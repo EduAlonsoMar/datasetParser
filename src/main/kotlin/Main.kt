@@ -10,7 +10,9 @@ import java.io.BufferedReader
 import java.io.File
 import java.nio.file.Paths
 import java.sql.DriverManager
+import tornadofx.*
 
+class MyApp: App(MainWindow::class)
 private fun convertDataSetToOnlyTuitsToHydrate() {
     val bufferedReader = File("/Users/edualonso/Documents/UNED/TFG/datasets/CoAID/05-01-2020/NewsFakeCOVID-19_tweets.csv").bufferedReader()
     val bufferedWriter = File("/Users/edualonso/Documents/UNED/TFG/datasets/CoAID/05-01-2020/CNewsFakeCOVID-19_tweets_only.csv").bufferedWriter()
@@ -28,30 +30,18 @@ private fun convertDataSetToOnlyTuitsToHydrate() {
     csvPrinter.close()
 }
 
-class DefaultDatasetTimedSelected : DatasetTimedSelected {
-
-    lateinit var parser : ParserDataSetTimed
-
-    override fun fileSelected(file: File) {
-        println("File selected ${file.path}")
-        parser = ParserDataSetTimed(file)
-        parser.insertRecordsInDataBase()
-
-    }
-
-}
 
 fun main(args: Array<String>) {
 
-    val datasetTimedHandler = DefaultDatasetTimedSelected()
-
-    val appUi = MainWindow()
-    appUi.start(datasetTimedHandler)
+    //val appUi = MainWindow()
+    // appUi.start(datasetTimedHandler)
 
     //val jdbcUrl = "jdbc:mysql://localhost:3306/FakeNewsDataSet"
 
     //val connection = DriverManager.getConnection(jdbcUrl, "fakenews", "fakenews")
 
+
+    launch<MyApp>()
     println("Window launch")
 
     //val stmt = connection.createStatement()

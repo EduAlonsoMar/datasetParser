@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.7.20"
     application
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.openjfx.javafxplugin") version "0.0.8"
 }
 
 group = "org.example"
@@ -17,6 +17,7 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("org.apache.commons:commons-csv:1.5")
     implementation("mysql:mysql-connector-java:8.0.25")
+    implementation ("no.tornado:tornadofx:1.7.20")
 }
 
 tasks.test {
@@ -24,7 +25,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 application {
@@ -32,6 +33,6 @@ application {
 }
 
 javafx {
-    version = "19"
+    version = "11.0.2"
     modules("javafx.controls", "javafx.fxml")
 }
