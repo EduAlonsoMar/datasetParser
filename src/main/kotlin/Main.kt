@@ -1,15 +1,8 @@
-import database.DataBaseInsertion
-import datasetlabeled.ParserDataSetTimed
-import datasettreatment.parseNewsFake
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
 import ui.MainWindow
-import ui.handler.DatasetTimedSelected
-import java.io.BufferedReader
 import java.io.File
-import java.nio.file.Paths
-import java.sql.DriverManager
 import tornadofx.*
 
 class MyApp: App(MainWindow::class)

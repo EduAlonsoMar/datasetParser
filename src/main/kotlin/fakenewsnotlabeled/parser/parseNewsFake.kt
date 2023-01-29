@@ -1,4 +1,4 @@
-package datasettreatment
+package fakenewsnotlabeled.parser
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser

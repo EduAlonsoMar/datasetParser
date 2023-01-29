@@ -1,6 +1,6 @@
-package database
+package fakenewsnotlabeled.db
 
-import datamodel.Tuit
+import fakenewsnotlabeled.model.csv.TuitNewsRecord
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import util.DateTimeUtils

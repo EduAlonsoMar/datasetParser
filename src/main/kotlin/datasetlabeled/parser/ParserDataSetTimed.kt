@@ -1,5 +1,7 @@
-package datasetlabeled
+package datasetlabeled.parser
 
+import datasetlabeled.db.DataBaseInsertions
+import datasetlabeled.db.DataBaseLabeled
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import java.io.BufferedReader
@@ -9,7 +11,7 @@ class ParserDataSetTimed (var fileToParse: File? = null) {
 
     private var csvParser: CSVParser? = null
 
-    private val dataBaseHandler = DataBaseLabeled()
+    private val dataBaseHandler = DataBaseInsertions()
 
     @kotlin.jvm.Throws(RuntimeException::class)
     fun insertRecordsInDataBase () {
@@ -17,8 +19,6 @@ class ParserDataSetTimed (var fileToParse: File? = null) {
         if (fileToParse == null) {
             throw (RuntimeException("file To parse must not be null"))
         }
-
-        dataBaseHandler.initializeConnection()
 
         dataBaseHandler.insertDataSetDescription(fileToParse!!.name, "")
 
