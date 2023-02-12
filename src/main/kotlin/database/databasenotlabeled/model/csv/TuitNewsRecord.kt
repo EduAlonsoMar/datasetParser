@@ -1,4 +1,4 @@
-package fakenewsnotlabeled.model.csv
+package database.databasenotlabeled.model.csv
 
 data class TuitNewsRecord (val newsId: String, val tuitId: String){
 }

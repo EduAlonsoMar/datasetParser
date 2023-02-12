@@ -1,6 +1,5 @@
-package datasetlabeled.db
+package database.databaselabeled.db
 
-import datasetlabeled.model.UserReaction
 import javafx.collections.ObservableList
 import tornadofx.observableListOf
 import java.sql.Date
@@ -68,11 +67,11 @@ class DataBaseGetInfo: DataBaseLabeled() {
         return null
     }
 
-    fun getDataSetList(): ObservableList<String> {
+    fun getDataSetList(): ArrayList<String> {
         val query = "SELECT name FROM dataset"
         initializeConnection()
         val stmt = connection?.createStatement()
-        val result = observableListOf<String>()
+        val result = arrayListOf<String>()
         stmt?.let {statement ->
             try {
                 val rs = statement.executeQuery(query)
@@ -80,7 +79,7 @@ class DataBaseGetInfo: DataBaseLabeled() {
                     result.add(rs.getString("name"))
                 }
             } catch (e: SQLException) {
-                println("Error while executing $query")
+                logQueryError(query, e)
             }
         }
 
@@ -106,7 +105,7 @@ class DataBaseGetInfo: DataBaseLabeled() {
                     return rs.getInt("users")
                 }
             } catch (e: SQLException) {
-                println("Error while executing query ${query}")
+                logQueryError(query, e)
             }
         }
 
@@ -137,18 +136,10 @@ class DataBaseGetInfo: DataBaseLabeled() {
                     }
                 }
             } catch (e: SQLException) {
-                println("Error while executing query ${query}")
+                logQueryError(query, e)
             }
         }
 
         return result
-    }
-    fun getUsersEndorsingInDay(day: Calendar): Int? {
-        return getNumberOfUsersInDayDependingOnLabel(day, "endorses")
-
-    }
-
-    fun getUsersDenyingInDay(day: Calendar): Int? {
-        return getNumberOfUsersInDayDependingOnLabel(day, "denies")
     }
 }

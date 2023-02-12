@@ -1,4 +1,4 @@
-package datasetlabeled.db
+package database.databaselabeled.db
 
 import org.apache.commons.csv.CSVParser
 import java.sql.SQLException
@@ -6,28 +6,19 @@ import java.sql.SQLIntegrityConstraintViolationException
 import java.sql.Statement
 
 class DataBaseInsertions: DataBaseLabeled() {
-    private var insertDatasetDescription = "INSERT INTO dataset (name, description) VALUES (\"%s\", \"%s\")"
-    private var insertUserTemplate = "INSERT INTO user (id) VALUES (\"%s\")"
-    private var insertOpinionTemplate ="INSERT INTO opinion (datasetId, userId, date, label) VALUES (%s, %s, \"%s\", \"%s\")"
+
 
     fun insertDataSetDescription (name: String, desc: String) {
         initializeConnection()
         val query = String.format(insertDatasetDescription, name, desc)
 
-        println(query)
-
         val stmt = connection?.createStatement()
-
-
 
         stmt?.let { statement ->
             try {
-
-                if (!statement.execute(query)) {
-                    println("statement with query $query failed")
-                }
+                statement.execute(query)
             } catch (e: SQLIntegrityConstraintViolationException) {
-                println("dataset $name already inserted")
+                logQueryError(query, e)
             }
         }
     }
@@ -49,16 +40,12 @@ class DataBaseInsertions: DataBaseLabeled() {
                 try {
                     statement.execute(queryForUsers)
                 } catch (e: SQLException) {
-                    print("\u001b[31m \t\t The following query Failed!! \u001b[0m")
-                    print(" \"${queryForUsers}\"")
-                    println(" because of and SQLException: ${e.message}")
+                    logQueryError(queryForUsers, e)
                 }
                 try {
                     statement.execute(queryForOpinions)
                 } catch (e: SQLException){
-                    print("\u001b[31m \t\t The following query Failed!! \u001b[0m")
-                    print(" \"${queryForOpinions}\"")
-                    println(" because of and SQLException: ${e.message}")
+                    logQueryError(queryForOpinions, e)
                 }
 
             }
@@ -67,6 +54,12 @@ class DataBaseInsertions: DataBaseLabeled() {
 
     fun destroy() {
         closeConnection()
+    }
+
+    companion object {
+        private const val insertDatasetDescription = "INSERT INTO dataset (name, description) VALUES (\"%s\", \"%s\")"
+        private const val insertUserTemplate = "INSERT INTO user (id) VALUES (\"%s\")"
+        private const val insertOpinionTemplate ="INSERT INTO opinion (datasetId, userId, date, label) VALUES (%s, %s, \"%s\", \"%s\")"
     }
 
 }

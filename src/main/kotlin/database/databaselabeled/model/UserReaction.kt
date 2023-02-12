@@ -1,4 +1,4 @@
-package datasetlabeled.model
+package database.databaselabeled.model
 
 import java.sql.Date
 

@@ -1,6 +1,6 @@
 package ui.handler
 
-import datasetlabeled.parser.ParserDataSetTimed
+import database.databaselabeled.parser.ParserDataSetTimed
 import tornadofx.Controller
 import java.io.File
 

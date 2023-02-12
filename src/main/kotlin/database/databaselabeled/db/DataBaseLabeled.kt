@@ -1,30 +1,11 @@
-package datasetlabeled.db
+package database.databaselabeled.db
 
-import javafx.collections.ObservableList
-import org.apache.commons.csv.CSVParser
-import tornadofx.observableListOf
-import util.DateTimeUtils
+import database.FakeNewsDataBase
 import java.sql.Connection
-import java.sql.Date
 import java.sql.DriverManager
-import java.sql.SQLException
 import java.sql.SQLIntegrityConstraintViolationException
-import java.sql.Statement
 
-open class DataBaseLabeled {
-
-    protected var connection: Connection? = null
-
-    protected fun initializeConnection() {
-        val jdbcUrl = "jdbc:mysql://localhost:3306/DataSetLabeled"
-        if (connection == null) {
-            connection = DriverManager.getConnection(jdbcUrl, "fakenews", "fakenews")
-        }
-        println(connection!!.isValid(0))
-    }
-
-
-
+open class DataBaseLabeled: FakeNewsDataBase(dataBaseUrl, user, pass) {
 
 
     protected fun getDataSetId (name: String): Int {
@@ -49,8 +30,9 @@ open class DataBaseLabeled {
 
 
 
-    fun closeConnection() {
-        connection?.close()
-        connection = null
+    companion object {
+        private const val dataBaseUrl = "jdbc:mysql://localhost:3306/DataSetLabeled"
+        private const val user = "fakenews"
+        private const val pass = "fakenews"
     }
 }

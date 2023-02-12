@@ -1,10 +1,8 @@
-package datasetlabeled.parser
+package database.databaselabeled.parser
 
-import datasetlabeled.db.DataBaseInsertions
-import datasetlabeled.db.DataBaseLabeled
+import database.databaselabeled.db.DataBaseInsertions
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
-import java.io.BufferedReader
 import java.io.File
 
 class ParserDataSetTimed (var fileToParse: File? = null) {

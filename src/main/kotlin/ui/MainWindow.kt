@@ -1,8 +1,8 @@
 package ui
 
-import datasetlabeled.db.DataBaseGetInfo
-import datasetlabeled.db.DataBaseInsertions
-import datasetlabeled.db.DataBaseLabeled
+import database.databaselabeled.db.DataBaseGetInfo
+import database.databaselabeled.db.DataBaseInsertions
+import database.databasenotlabeled.db.DataBaseNotLabeled
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.BorderPane
 import javafx.stage.FileChooser
@@ -16,10 +16,16 @@ class MainWindow: View() {
 
     override val root : BorderPane by fxml("/MainScreen.fxml")
 
-    private val datasetList: ComboBox<String> by fxid()
+    private val datasetLabeledList: ComboBox<String> by fxid()
+    private val datasetNotLabeledList: ComboBox<String> by fxid()
+
+    private val dataBaseGetInfo = DataBaseGetInfo()
+    private val dataBaseInsertions = DataBaseInsertions()
+    private val dataBAseNotLabeled = DataBaseNotLabeled()
 
     init {
-        datasetList.items = DataBaseGetInfo().getDataSetList()
+        datasetLabeledList.items = dataBaseGetInfo.getDataSetList().toObservable()
+        datasetNotLabeledList.items = dataBAseNotLabeled.getFakeNewsTitleForMostFakeNewsUsers().toObservable()
     }
 
     fun fileToParseSelected() {
@@ -31,8 +37,13 @@ class MainWindow: View() {
         )
     }
 
-    fun selectedDataSetForResults() {
-        find<ResultWindow>(mapOf("selectedDataset" to datasetList.selectedItem)).openWindow()
+    fun selectedDataSetLabeledForResults() {
+        find<ResultLabeledWindow>(mapOf("selectedDataset" to datasetLabeledList.selectedItem)).openWindow()
+    }
+
+    fun selectedDataSetNotLabeledForResults() {
+        println("selectedDataset " + datasetNotLabeledList.selectedItem)
+        find<ResultNotLabeledWindow>(mapOf("selectedDataset" to datasetNotLabeledList.selectedItem)).openWindow()
     }
 
 }

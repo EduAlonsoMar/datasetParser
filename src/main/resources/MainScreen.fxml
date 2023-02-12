@@ -30,12 +30,32 @@
                 </TextField>
                 <Button text="Explore" onAction="#fileToParseSelected"/>
             </HBox>
-            <HBox>
-                <ComboBox fx:id="datasetList">
 
-                </ComboBox>
-                <Button text="Show Results" onAction="#selectedDataSetForResults" />
-            </HBox>
+            <VBox alignment="BASELINE_LEFT" spacing="5">
+                <Label text="Data sets labeled">
+                    <font>
+                        <Font size="15"/>
+                    </font>
+                </Label>
+                <HBox>
+                    <ComboBox fx:id="datasetLabeledList">
+
+                    </ComboBox>
+                    <Button text="Show Results" onAction="#selectedDataSetLabeledForResults" />
+                </HBox>
+                <Label text="Data sets not labeled">
+                    <font>
+                        <Font size="15"/>
+                    </font>
+                </Label>
+                <HBox>
+                    <ComboBox fx:id="datasetNotLabeledList">
+
+                    </ComboBox>
+                    <Button text="Show Results" onAction="#selectedDataSetNotLabeledForResults" />
+                </HBox>
+            </VBox>
+
         </VBox>
     </center>
 </BorderPane>
