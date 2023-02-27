@@ -1,4 +1,4 @@
-package ui
+package ui.fragment
 
 import database.databaselabeled.timeline.GetTimeLineLabeled
 import javafx.collections.ObservableList
@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane
 import tornadofx.*
 
 class ResultLabeledWindow : View("My View") {
-    override val root : BorderPane by fxml("/ResultScreen.fxml")
+    override val root : BorderPane by fxml("/ResultLabeledScreen.fxml")
 
     private var datasetSelected: String? = null
 

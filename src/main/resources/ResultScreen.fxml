@@ -7,30 +7,59 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
 <BorderPane xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" prefHeight="600.0" prefWidth="900.0">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
     <center>
-        <VBox alignment="CENTER" spacing="10">
-            <Label text="RESULTS">
+        <VBox alignment="TOP_CENTER" spacing="10">
+            <Label text="SEE DATA SETS and EXECUTION RESULTS">
                 <font>
                     <Font size="20"/>
                 </font>
             </Label>
 
-            <LineChart fx:id="resultChart">
-                <xAxis>
-                    <CategoryAxis side="BOTTOM" label="Days"/>
-                </xAxis>
-                <yAxis>
-                    <NumberAxis side="LEFT" label="\% of users"/>
-                </yAxis>
-            </LineChart>
+            <VBox alignment="BASELINE_LEFT" spacing="5">
+                <Label text="Data sets labeled">
+                    <font>
+                        <Font size="15"/>
+                    </font>
+                </Label>
+                <HBox>
+                    <ComboBox fx:id="datasetLabeledList">
+
+                    </ComboBox>
+                    <Button text="Show Results" onAction="#selectedDataSetLabeledForResults" />
+                </HBox>
+                <Label text="Data sets not labeled">
+                    <font>
+                        <Font size="15"/>
+                    </font>
+                </Label>
+                <HBox>
+                    <ComboBox fx:id="datasetNotLabeledList">
+
+                    </ComboBox>
+                    <Button text="Show Results" onAction="#selectedDataSetNotLabeledForResults"/>
+                </HBox>
+            </VBox>
+
+            <VBox alignment="BASELINE_LEFT" spacing="5">
+                <Label text="Data sets not labeled">
+                    <font>
+                        <Font size="15"/>
+                    </font>
+                </Label>
+                <HBox>
+                    <ComboBox fx:id="resultSteps">
+
+                    </ComboBox>
+                    <Button text="Show Results" onAction="#showExecutionSteps" />
+                </HBox>
+            </VBox>
+
+            <Button text="Back" onAction="#onBackToHomeclicked"/>
 
         </VBox>
     </center>

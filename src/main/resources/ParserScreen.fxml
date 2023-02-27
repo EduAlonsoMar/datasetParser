@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="500.0">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <center>
+        <VBox alignment="TOP_CENTER" spacing="10">
+            <Label text="Parse Datasets">
+                <font>
+                    <Font size="20"/>
+                </font>
+            </Label>
+            <HBox alignment="BASELINE_LEFT">
+                <Label text="Open file For data set labeled">
+                    <font>
+                        <Font size="10"/>
+                    </font>
+                </Label>
+                <TextField>
+
+                </TextField>
+                <Button text="Explore" onAction="#onParseDatasetLabeledClicked">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                </Button>
+            </HBox>
+
+            <HBox alignment="BASELINE_LEFT">
+                <Label text="Open file fir dataset not labeled">
+                    <font>
+                        <Font size="10"/>
+                    </font>
+                </Label>
+                <TextField>
+
+                </TextField>
+                <Button text="Explore" onAction="#onParseDatasetNotLabeledClicked"/>
+            </HBox>
+
+            <Button text="Back" onAction="#onBackToHomeclicked"/>
+
+        </VBox>
+    </center>
+</BorderPane>

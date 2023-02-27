@@ -1,11 +1,11 @@
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
-import ui.MainWindow
 import java.io.File
 import tornadofx.*
+import ui.HomeWindow
 
-class MyApp: App(MainWindow::class)
+class MyApp: App(HomeWindow::class)
 private fun convertDataSetToOnlyTuitsToHydrate() {
     val bufferedReader = File("/Users/edualonso/Documents/UNED/TFG/datasets/CoAID/05-01-2020/NewsFakeCOVID-19_tweets.csv").bufferedReader()
     val bufferedWriter = File("/Users/edualonso/Documents/UNED/TFG/datasets/CoAID/05-01-2020/CNewsFakeCOVID-19_tweets_only.csv").bufferedWriter()

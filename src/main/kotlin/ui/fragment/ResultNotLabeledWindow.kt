@@ -1,4 +1,4 @@
-package ui
+package ui.fragment
 
 import database.databasenotlabeled.timeline.GetTimeLineNotLabeled
 import javafx.collections.ObservableList
@@ -10,7 +10,7 @@ import tornadofx.*
 class ResultNotLabeledWindow : View("My View") {
     override val root : BorderPane by fxml("/ResultNotLabeledScreen.fxml")
 
-    private var datasetSelected: String? = params["selectedDataset"] as? String
+    private var datasetSelected: String? = null
 
     private val resultChart : LineChart<String, Number> by fxid()
 
@@ -24,7 +24,7 @@ class ResultNotLabeledWindow : View("My View") {
         super.onDock()
         println("On Dock")
         datasetSelected = params["selectedDataset"] as? String
-        println(" Selected DataSet is ${params["selectedDataset"] as? String}")
+        println(" Selected DataSet is ${params["configSelected"] as? String}")
         println(" Selected DataSet is $datasetSelected")
 
         //resultChart.removeFromParent()
