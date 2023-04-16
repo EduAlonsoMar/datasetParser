@@ -10,7 +10,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ComboBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="500.0">
+<BorderPane xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="500.0" fx:id="panel">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
@@ -39,7 +39,7 @@
             </HBox>
 
             <HBox alignment="BASELINE_LEFT">
-                <Label text="Open file fir dataset not labeled">
+                <Label text="Open file fir dataset not labeled with list of news">
                     <font>
                         <Font size="10"/>
                     </font>
@@ -47,7 +47,19 @@
                 <TextField>
 
                 </TextField>
-                <Button text="Explore" onAction="#onParseDatasetNotLabeledClicked"/>
+                <Button text="Explore" onAction="#onParseDatasetNotLabeledWithNewsClicked"/>
+            </HBox>
+
+            <HBox alignment="BASELINE_LEFT">
+                <Label text="Open file fir dataset not labeled with list of tuits per news">
+                    <font>
+                        <Font size="10"/>
+                    </font>
+                </Label>
+                <TextField>
+
+                </TextField>
+                <Button fx:id="buttonExploreTuits" text="Explore" onAction="#onParseDatasetNotLabeledWithTuitsClicked"/>
             </HBox>
 
             <Button text="Back" onAction="#onBackToHomeclicked"/>

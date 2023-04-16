@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="400.0" prefWidth="600.0">
+            prefHeight="600.0" prefWidth="600.0">
 
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
@@ -24,9 +24,18 @@
                 </font>
             </Label>
 
-            <LineChart fx:id="resultChart">
+            <LineChart fx:id="resultChartHours">
                 <xAxis>
                     <CategoryAxis side="BOTTOM" label="Hours"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis side="LEFT" label="\% of users sharing info"/>
+                </yAxis>
+            </LineChart>
+
+            <LineChart fx:id="resultChartDays">
+                <xAxis>
+                    <CategoryAxis side="BOTTOM" label="Days"/>
                 </xAxis>
                 <yAxis>
                     <NumberAxis side="LEFT" label="\% of users sharing info"/>

@@ -1,11 +1,26 @@
+import javafx.stage.Stage
+import koin.appModule
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
+import org.koin.core.context.GlobalContext.startKoin
 import java.io.File
 import tornadofx.*
 import ui.HomeWindow
+import ui.css.AppStyle
 
-class MyApp: App(HomeWindow::class)
+class MyApp: App(HomeWindow::class, AppStyle::class) {
+    override fun start(stage: Stage) {
+        with (stage) {
+            minWidth = 900.0
+            minHeight = 600.0
+            super.start(this)
+        }
+    }
+    init {
+        reloadStylesheetsOnFocus()
+    }
+}
 private fun convertDataSetToOnlyTuitsToHydrate() {
     val bufferedReader = File("/Users/edualonso/Documents/UNED/TFG/datasets/CoAID/05-01-2020/NewsFakeCOVID-19_tweets.csv").bufferedReader()
     val bufferedWriter = File("/Users/edualonso/Documents/UNED/TFG/datasets/CoAID/05-01-2020/CNewsFakeCOVID-19_tweets_only.csv").bufferedWriter()
@@ -26,22 +41,11 @@ private fun convertDataSetToOnlyTuitsToHydrate() {
 
 fun main(args: Array<String>) {
 
-    //val appUi = MainWindow()
-    // appUi.start(datasetTimedHandler)
-
-    //val jdbcUrl = "jdbc:mysql://localhost:3306/FakeNewsDataSet"
-
-    //val connection = DriverManager.getConnection(jdbcUrl, "fakenews", "fakenews")
+    startKoin {
+        modules(appModule)
+    }
 
 
     launch<MyApp>()
     println("Window launch")
-
-    //val stmt = connection.createStatement()
-
-    //println(connection.isValid(0))
-
-    //DataBaseInsertion().insertNewsFake(parseNewsFake().getParserForFakeNews(), connection)
-    //DataBaseInsertion().insertUsers(parseNewsFake().getParserForTuitsFakeNews(), connection)
-    //DataBaseInsertion().insertTuits(parseNewsFake().getParserForTuitsNewsConnection(), parseNewsFake().getParserForTuitsFakeNews(), connection)
 }

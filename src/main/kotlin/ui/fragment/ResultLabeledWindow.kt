@@ -1,21 +1,21 @@
 package ui.fragment
 
-import database.databaselabeled.timeline.GetTimeLineLabeled
-import javafx.collections.ObservableList
+
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.XYChart
-import javafx.scene.chart.XYChart.Series
 import javafx.scene.layout.BorderPane
-import tornadofx.*
+import tornadofx.View
+import ui.handler.ResultsChartCreationController
 
 class ResultLabeledWindow : View("My View") {
     override val root : BorderPane by fxml("/ResultLabeledScreen.fxml")
+
+    private val resultsChartCreationController: ResultsChartCreationController by inject()
 
     private var datasetSelected: String? = null
 
     private val resultChart : LineChart<String, Number> by fxid()
 
-    private lateinit var getTimeLineLabeledUtils: GetTimeLineLabeled
 
     private val template = "%d"
 
@@ -35,11 +35,20 @@ class ResultLabeledWindow : View("My View") {
         println(" Selected DataSet is $datasetSelected")
 
         //resultChart.removeFromParent()
-        getTimeLineLabeledUtils = GetTimeLineLabeled(datasetSelected!!)
+
 
         resultChart.title = "Time evolution for $datasetSelected"
-        series1 = Series("Believers", createBelieversSeries())
-        series2 = Series("Deniers", createDeniersSeries())
+        datasetSelected?.let {
+            series1 = XYChart.Series(
+                "Believers",
+                resultsChartCreationController.createBelieversChartInLabeledDataset(it))
+
+            series2 = XYChart.Series(
+                "Deniers",
+                resultsChartCreationController.createDeniersChartInLabeledDataset(it)
+            )
+        }
+
         resultChart.data.addAll(series1, series2)
 
     }
@@ -55,37 +64,4 @@ class ResultLabeledWindow : View("My View") {
         resultChart.data.removeAll(series1, series2)
     }
 
-    private fun createBelieversSeries(): ObservableList<XYChart.Data<String, Number>> {
-        val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
-
-        // println(" Total days: ${getTimeLineUtils.totalDays}")
-        var data: XYChart.Data<String, Number>
-        var days: String
-        var value: Number
-        for (i in 0..15) {
-            value = i
-            days = String.format(template, i)
-            data = XYChart.Data<String, Number>(days, (getTimeLineLabeledUtils.getNumberOfBelieversForDay(i) * 100) / getTimeLineLabeledUtils.totalUsers)
-            result.add(data)
-        }
-
-        return result
-
-    }
-
-    private fun createDeniersSeries(): ObservableList<XYChart.Data<String, Number>> {
-        val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
-
-        var data: XYChart.Data<String, Number>
-        var days: String
-        var value: Number
-        for (i in 0..15) {
-            value = i
-            days = String.format(template, i)
-            data = XYChart.Data<String, Number>(days, (getTimeLineLabeledUtils.getNumberOfDeniersForDay(i) * 100)/getTimeLineLabeledUtils.totalUsers)
-            result.add(data)
-        }
-        return result
-
-    }
 }

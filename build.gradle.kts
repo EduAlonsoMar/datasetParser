@@ -18,6 +18,8 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.5")
     implementation("mysql:mysql-connector-java:8.0.25")
     implementation ("no.tornado:tornadofx:1.7.20")
+
+    implementation ("io.insert-koin:koin-core:3.3.3")
 }
 
 tasks.test {

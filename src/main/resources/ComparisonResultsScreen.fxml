@@ -6,14 +6,11 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextField?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="600.0" prefWidth="600.0">
+            prefHeight="800.0" prefWidth="600.0">
 
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
@@ -21,13 +18,13 @@
 
     <center>
         <VBox alignment="CENTER" spacing="10">
-            <Label text="RESULTS">
+            <Label text="COMPARISON">
                 <font>
                     <Font size="20"/>
                 </font>
             </Label>
 
-            <LineChart fx:id="resultChartSharing">
+            <LineChart fx:id="chartNotLabeled">
                 <xAxis>
                     <CategoryAxis side="BOTTOM" label="Hours"/>
                 </xAxis>
@@ -36,19 +33,14 @@
                 </yAxis>
             </LineChart>
 
-            <LineChart fx:id="resultChartPercentages">
+            <LineChart fx:id="chartConfig">
                 <xAxis>
-                    <CategoryAxis side="BOTTOM" label="Days"/>
+                    <CategoryAxis side="BOTTOM" label="Hours"/>
                 </xAxis>
                 <yAxis>
-                    <NumberAxis side="LEFT" label="\% of users"/>
+                    <NumberAxis side="LEFT" label="\% of users sharing info"/>
                 </yAxis>
             </LineChart>
-
-            <HBox>
-                <Button text="error" onAction="#onCalculateErrorClicked"></Button>
-                <TextField fx:id="forShowError"></TextField>
-            </HBox>
 
         </VBox>
     </center>
