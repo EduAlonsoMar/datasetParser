@@ -383,11 +383,13 @@ class ExecutionsDataSource : KoinComponent {
                 i
             )
             try {
-
                 queryResult = statement.executeQuery(getQuery)
                 if (queryResult.next()) {
                     tmpToCheckResult = queryResult.getInt(believersStepColumn)
-                    result = if (tmpToCheckResult > result) {
+                    if (i == tick) {
+                        result = tmpToCheckResult
+                    }
+                    result = if (tmpToCheckResult < result) {
                         tmpToCheckResult
                     } else {
                         result
@@ -419,7 +421,10 @@ class ExecutionsDataSource : KoinComponent {
                 queryResult = statement.executeQuery(getQuery)
                 if (queryResult.next()) {
                     tmpToCheckResult = queryResult.getInt(factCheckersStepColumn)
-                    result = if (tmpToCheckResult > result) {
+                    if (i == tick) {
+                        result = tmpToCheckResult
+                    }
+                    result = if (tmpToCheckResult < result) {
                         tmpToCheckResult
                     } else {
                         result

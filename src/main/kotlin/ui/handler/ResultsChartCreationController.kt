@@ -15,12 +15,10 @@ class ResultsChartCreationController : Controller() {
     private val datasetNotLabeledRepository = DatasetNotLabeledRepository()
     private val executionsResultsRepository = ExecutionsResultsRepository()
 
-    fun createBelieversChartInLabeledDataset(datasetTitle: String): ObservableList<XYChart.Data<String, Number>> {
+    fun createBelieversSeriesInLabeledDatasetId(datasetId: Int): ObservableList<XYChart.Data<String, Number>> {
         val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
-        val datasetId = datasetLabeledRepository.getDatasetId(datasetTitle)
         var data: XYChart.Data<String, Number>
         var days: String
-
         for (i in 0..15) {
 
             days = String.format(templateForXAxis, i)
@@ -37,9 +35,14 @@ class ResultsChartCreationController : Controller() {
         return result
     }
 
-    fun createDeniersChartInLabeledDataset(datasetTitle: String): ObservableList<XYChart.Data<String, Number>> {
+    fun createBelieversSeriesInLabeledDatasetTitle(
+        datasetTitle: String
+    ): ObservableList<XYChart.Data<String, Number>> {
+        return createBelieversSeriesInLabeledDatasetId(datasetLabeledRepository.getDatasetId(datasetTitle))
+    }
+
+    fun createDeniersSeriesInLabeledDatasetId(datasetId: Int): ObservableList<XYChart.Data<String, Number>> {
         val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
-        val datasetId = datasetLabeledRepository.getDatasetId(datasetTitle)
         var data: XYChart.Data<String, Number>
         var days: String
         for (i in 0..15) {
@@ -56,12 +59,16 @@ class ResultsChartCreationController : Controller() {
         return result
     }
 
+    fun createDeniersChartInLabeledDataset(datasetTitle: String): ObservableList<XYChart.Data<String, Number>> {
+        return createDeniersSeriesInLabeledDatasetId(datasetLabeledRepository.getDatasetId(datasetTitle))
+    }
+
     fun createUsersSharingFromDatasetNotLabeledTitle(datasetTitle: String): ObservableList<XYChart.Data<String, Number>> {
         val datasetId = datasetNotLabeledRepository.getDatasetId(datasetTitle)
         return createUsersSharingFromDatasetNotLabeledId(datasetId)
     }
 
-    fun createUsersSharingFromDatasetNotLabeledId (datasetId: Int): ObservableList<XYChart.Data<String, Number>> {
+    fun createUsersSharingFromDatasetNotLabeledId(datasetId: Int): ObservableList<XYChart.Data<String, Number>> {
         val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
         var data: XYChart.Data<String, Number>
         var hours: String

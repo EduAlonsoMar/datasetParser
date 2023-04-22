@@ -6,10 +6,10 @@ import data.repository.ExecutionsResultsRepository
 import javafx.geometry.Pos
 import tornadofx.*
 import ui.css.AppStyle
-import ui.fragment.ResultForComparisonWindow
-import ui.fragment.ResultForExecutionBatchWindow
-import ui.fragment.ResultLabeledWindow
-import ui.fragment.ResultNotLabeledWindow
+import ui.fragment.*
+import ui.fragment.ResultForComparisonLabeledWindow.Companion.DATASET_LABELED_PARAM
+import ui.fragment.ResultForComparisonWindow.Companion.DATASET_NOT_LABELED_PARAM
+import ui.fragment.ResultForComparisonWindow.Companion.EXECUTION_PARAM
 
 class ResultWindow : View() {
 
@@ -138,12 +138,40 @@ class ResultWindow : View() {
                         button("Show Comparison").setOnAction {
                             find<ResultForComparisonWindow>(
                                 mapOf(
-                                    "datasetNotLabeled" to datasetNotLabeled.text,
-                                    "execution" to execution.text
+                                    DATASET_NOT_LABELED_PARAM to datasetNotLabeled.text,
+                                    EXECUTION_PARAM to execution.text
                                 )
                             ).openWindow()
                         }
 
+                    }
+                    val executionLabeled = hbox {
+                        label("execution id") {
+                            addClass(AppStyle.textField)
+                        }
+                        label("Dataset labeled id") {
+                            addClass(AppStyle.textField)
+                        }
+
+                    }
+
+                    val datasetLabeled = hbox {
+                        val execution = textfield {
+                            addClass(AppStyle.textField)
+                        }
+
+                        val datasetLabeled = textfield {
+                            addClass(AppStyle.textField)
+                        }
+
+                        button("Show Comparison").setOnAction {
+                            find<ResultForComparisonLabeledWindow>(
+                                mapOf(
+                                    DATASET_LABELED_PARAM to datasetLabeled.text,
+                                    ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.text
+                                )
+                            ).openWindow()
+                        }
                     }
 
 

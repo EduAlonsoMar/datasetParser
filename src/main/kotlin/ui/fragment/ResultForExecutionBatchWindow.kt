@@ -7,10 +7,12 @@ import data.repository.DatasetNotLabeledRepository
 import data.repository.ExecutionsResultsRepository
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.XYChart
+import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
 import tornadofx.View
 import ui.handler.ResultsChartCreationController
+import kotlin.properties.Delegates
 
 class ResultForExecutionBatchWindow : View() {
 
@@ -19,6 +21,7 @@ class ResultForExecutionBatchWindow : View() {
     private val resultChartSharing: LineChart<String, Number> by fxid()
     private val resultChartPercentages: LineChart<String, Number> by fxid()
     private val forShowError: TextField by fxid()
+    private val forShowErrorLabeled: Label by fxid()
     private val resultsChartsController: ResultsChartCreationController by inject()
 
     private var configSelected: String? = params["configSelected"] as? String
@@ -30,6 +33,10 @@ class ResultForExecutionBatchWindow : View() {
     private lateinit var series1: XYChart.Series<String, Number>
     private lateinit var series2: XYChart.Series<String, Number>
     private lateinit var series3: XYChart.Series<String, Number>
+
+    private var percentageCompletion: String by Delegates.observable("") { _, _, newValue ->
+        forShowErrorLabeled.text = newValue
+    }
 
     override fun onDock() {
         super.onDock()
@@ -173,12 +180,30 @@ class ResultForExecutionBatchWindow : View() {
 
     }
 
+    fun onCalculateErrorForLabeledClicked() {
+        val configs = executionsResultsRepository.getConfigurations()
+
+        for ((i, config) in configs.withIndex()) {
+            percentageCompletion = "${(i * 100) / configs.size} % of executions completed"
+            val listLabeled = datasetLabeledRepository.getDatasets()
+
+            for (dataset in listLabeled) {
+                executionsResultsRepository.insertErrorLabeled(calculateNrmseLabeled(config, dataset))
+            }
+
+            println("Calculated error labeled $i")
+        }
+        forShowErrorLabeled.text = "Done"
+    }
+
     fun onCalculateErrorClicked() {
         //forShowError.text = calculateNrmseNotLabeled().toString()
         val configs = executionsResultsRepository.getConfigurations()
 
         //val list = dbHandler.getListOfExecutions()
+        var i = 0
         for (config in configs) {
+            percentageCompletion = "${(i * 100) / configs.size} % of executions completed"
             val listNotLabeled = datasetNotLabeledRepository.getDataSets()
             val listLabeled = datasetLabeledRepository.getDatasets()
             for (dataset in listNotLabeled) {
@@ -192,13 +217,11 @@ class ResultForExecutionBatchWindow : View() {
             }
 
             println("Calculated error labeled")
-
+            i++
 
         }
 
         forShowError.text = "Done"
-
-        // TODO: Añadir el cálculo para las labeled.
     }
 
     override fun onUndock() {

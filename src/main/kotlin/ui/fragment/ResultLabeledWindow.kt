@@ -41,7 +41,7 @@ class ResultLabeledWindow : View("My View") {
         datasetSelected?.let {
             series1 = XYChart.Series(
                 "Believers",
-                resultsChartCreationController.createBelieversChartInLabeledDataset(it))
+                resultsChartCreationController.createBelieversSeriesInLabeledDatasetTitle(it))
 
             series2 = XYChart.Series(
                 "Deniers",
