@@ -161,20 +161,24 @@ class ParserController : Controller() {
         fileWithSteps = file
     }
 
-    fun parseExecutionResultsFiles() {
+    fun parseExecutionResultsFilesFromOSNModel() {
         if (fileWithConfig == null ||
-            fileWithSteps == null) {
+            fileWithSteps == null
+        ) {
             println("All files for execution result parsing must be present")
             return
         }
 
-        val parser = executionsParserRepository.getParser(fileWithConfig = fileWithConfig!!, fileWithSteps = fileWithSteps!!)
+        val parser = executionsParserRepository.getParser(
+            fileWithConfig = fileWithConfig!!,
+            fileWithSteps = fileWithSteps!!
+        )
 
         val keyMapForConfigIds = mutableMapOf<String, Int>()
         var configId: Int
         for (record in parser.parserForConfig) {
-            configId = executionsResultsRepository.insertConfiguration(
-                Configuration(
+            configId = executionsResultsRepository.insertConfigurationOSN(
+                ConfigurationOSN(
                     topology = record.get(ExecutionsParser.topologyColumn),
                     agents = record.get(ExecutionsParser.agentsColumn),
                     influencers = record.get(ExecutionsParser.influencersColumn),
@@ -197,13 +201,74 @@ class ParserController : Controller() {
         }
 
         for (record in parser.parserForSteps) {
-            executionsResultsRepository.insertStep(
-                Step (
-                  record.get(ExecutionsParser.tickColumn),
+            executionsResultsRepository.insertStepOSN(
+                Step(
+                    record.get(ExecutionsParser.tickColumn),
                     record.get(ExecutionsParser.believersColumn),
                     record.get(ExecutionsParser.factCheckers),
                     keyMapForConfigIds[record.get(ExecutionsParser.configIdColumn)].toString(),
                     record.get(ExecutionsParser.believersSharingColumn)
+                )
+            )
+        }
+    }
+
+    fun parseExecutionResultsFilesFromSocialFakeNewsModel() {
+        if (fileWithConfig == null ||
+            fileWithSteps == null
+        ) {
+            println("All files for execution result parsing must be present")
+            return
+        }
+
+        val parser = executionsParserRepository.getParser(
+            fileWithConfig = fileWithConfig!!,
+            fileWithSteps = fileWithSteps!!
+        )
+
+        val keyMapForConfigIds = mutableMapOf<String, Int>()
+        var configId: Int
+        for (record in parser.parserForConfig) {
+            configId = executionsResultsRepository.insertConfigurationSocial(
+                ConfigurationSocialFakeNews(
+
+                    believersCount = record.get(ExecutionsParser.nBelieversColumn),
+                    deniersCount = record.get(ExecutionsParser.denierCountColumn),
+                    susceptibleCount = (Integer.parseInt(record.get(ExecutionsParser.nAgentsColumn)) -
+                            (Integer.parseInt(record.get(ExecutionsParser.nBelieversColumn)) +
+                                    Integer.parseInt(record.get(ExecutionsParser.denierCountColumn))))
+                        .toString(),
+                    averageFollowers = record.get(ExecutionsParser.avgFollowersColumn),
+                    selectedTopology = record.get(ExecutionsParser.selectedTopologyColumn),
+                    numberOfTicks = record.get(ExecutionsParser.nTicksColumn),
+                    totalAgents = record.get(ExecutionsParser.nAgentsColumn),
+                    nodesInBarabasi = record.get(ExecutionsParser.nodesInBarabasiColumn),
+                    initialNodesInBarabasi = record.get(ExecutionsParser.initialNodesBarabasiColumn),
+                    nBots = record.get(ExecutionsParser.nBotsColumn),
+                    createInterest = record.get(ExecutionsParser.createInterestsColumn),
+                    nOfInterests = record.get(ExecutionsParser.nOfInterestsColumn),
+                    nOfInfluencersBelievers = record.get(ExecutionsParser.nInfluencersBelieversColumn),
+                    nOfInfluencersDeniers = record.get(ExecutionsParser.nInfluencersDeniersColumn),
+                    nOfInfluencersSusceptibles = record.get(ExecutionsParser.nInfluencersSusceptiblesColumn),
+                    nFollowersToBeInfluencer = record.get(ExecutionsParser.nFollowersInfluencersColumn),
+                    nBotsConnections = record.get(ExecutionsParser.nBotsConnectionsColumn),
+                    pInfl = record.get(ExecutionsParser.influencersProbColumn),
+                    pbelieve = record.get(ExecutionsParser.believeProbColumn),
+                    pDeny = record.get(ExecutionsParser.denyProbSocialColumn),
+                    pVacc = record.get(ExecutionsParser.vaccProbColumn)
+                )
+            )
+            keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)] = configId
+        }
+
+        for (record in parser.parserForSteps) {
+            executionsResultsRepository.insertStepSocial(
+                Step(
+                    record.get(ExecutionsParser.tickColumn),
+                    record.get(ExecutionsParser.believersSocialColumn),
+                    record.get(ExecutionsParser.deniersSocialColumn),
+                    keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)].toString(),
+                    "0"
                 )
             )
         }

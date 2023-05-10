@@ -1,9 +1,9 @@
 package ui.fragment
 
-
-import data.database.model.*
+import data.database.model.ConfigurationSocialFakeNews
+import data.database.model.DatasetLabeled
+import data.database.model.ErrorSocialForLabeled
 import data.repository.DatasetLabeledRepository
-import data.repository.DatasetNotLabeledRepository
 import data.repository.ExecutionsResultsRepository
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.XYChart
@@ -14,11 +14,9 @@ import tornadofx.View
 import ui.handler.ResultsChartCreationController
 import kotlin.properties.Delegates
 
-class ResultForExecutionBatchWindow : View() {
+class ResultForExecutionsSocialWindow : View() {
+    override val root: BorderPane by fxml("/ResultForExecutionBatchScreenSocial.fxml")
 
-    override val root: BorderPane by fxml("/ResultForExecutionBatchScreen.fxml")
-
-    private val resultChartSharing: LineChart<String, Number> by fxid()
     private val resultChartPercentages: LineChart<String, Number> by fxid()
     private val forShowError: TextField by fxid()
     private val forShowErrorLabeled: Label by fxid()
@@ -27,10 +25,8 @@ class ResultForExecutionBatchWindow : View() {
     private var configSelected: String? = params["configSelected"] as? String
 
     private var executionsResultsRepository = ExecutionsResultsRepository()
-    private var datasetNotLabeledRepository = DatasetNotLabeledRepository()
     private var datasetLabeledRepository = DatasetLabeledRepository()
 
-    private lateinit var series1: XYChart.Series<String, Number>
     private lateinit var series2: XYChart.Series<String, Number>
     private lateinit var series3: XYChart.Series<String, Number>
 
@@ -45,68 +41,31 @@ class ResultForExecutionBatchWindow : View() {
         println(" Selected DataSet is ${params["selectedDataset"] as? String}")
         println(" Selected DataSet is $configSelected")
 
-        //resultChart.removeFromParent()
 
-        resultChartSharing.title = "Time evolution for $configSelected"
         resultChartPercentages.title = "Users time evolution for $configSelected"
 
         configSelected?.let {
-            series1 = XYChart.Series(
-                "Users sharing fake news per hour",
-                resultsChartsController.createUsersSharingFakesInResultSeries(it)
-            )
+
             series2 = XYChart.Series(
                 "Percentage of believers per day",
-                resultsChartsController.createBelieversInResult(it)
+                resultsChartsController.createBelieversInResultSocial(it)
             )
             series3 = XYChart.Series(
-                "Percentage of believers per day",
-                resultsChartsController.createDeniersInResult(it)
+                "Percentage of deniers per day",
+                resultsChartsController.createDeniersInResultSocial(it)
             )
         }
 
-        resultChartSharing.data.addAll(series1)
+        // resultChartSharing.data.addAll(series1)
+
         resultChartPercentages.data.addAll(series2, series3)
 
     }
 
-
-    private fun calculateNrmseNotLabeled(config: ConfigurationOSN, dataset: DatasetNotLabeled): ErrorForNotLabeled {
-        var i = 0
-        var j = 0
-        var percentageOfBelieversSharingInStep: Double
-        var percentageOfBelieversSahringinDataset: Double
-        var totalSum = 0.0
-        var Pmax = 0.0
-        var Pmin = 0.0
-        var numberUsersSharingInAnHour: Double
-        while (j < 30) {
-            numberUsersSharingInAnHour = datasetNotLabeledRepository.getNumberOfUserSendingInAnHour(Integer.parseInt(dataset.id), j).toDouble()
-            percentageOfBelieversSharingInStep =
-                (executionsResultsRepository.getNumberOfUserSendingInAnHour(config.id.toString(), i).toDouble() * 100) / 1000
-            percentageOfBelieversSahringinDataset = (numberUsersSharingInAnHour * 100) / datasetNotLabeledRepository.getTotalUsers(Integer.parseInt(dataset.id))
-            if (i == 0) {
-                Pmin = percentageOfBelieversSahringinDataset
-            }
-            totalSum += Math.pow(percentageOfBelieversSharingInStep - percentageOfBelieversSahringinDataset, 2.0)
-            if (Pmax < percentageOfBelieversSahringinDataset) {
-                Pmax = percentageOfBelieversSahringinDataset
-            }
-            if (Pmin > percentageOfBelieversSahringinDataset) {
-                Pmin = percentageOfBelieversSahringinDataset
-            }
-            i += ExecutionsResultsRepository.normalizerForNotLabeled
-            j++
-        }
-        val rmse = Math.sqrt(totalSum / 30)
-        return ErrorForNotLabeled(
-            configurationId = config.id!!,
-            datasetNotLabeledId = Integer.parseInt(dataset.id),
-            rmse,
-            rmse / (Pmax - Pmin))
-    }
-
-    private fun calculateNrmseLabeled(config: ConfigurationOSN, dataset: DatasetLabeled): ErrorForLabeled {
+    private fun calculateNrmseLabeledSocial(
+        config: ConfigurationSocialFakeNews,
+        dataset: DatasetLabeled
+    ): ErrorSocialForLabeled {
         var i = 0
         var j = 0
         var numberOfBelieversInDay: Double
@@ -126,11 +85,11 @@ class ResultForExecutionBatchWindow : View() {
         while (i < 15) {
             numberOfBelieversInDay = datasetLabeledRepository.getNumberOfBelieversForDay(dataset.id!!, i).toDouble()
             percentageOfBelieversInDataset = (numberOfBelieversInDay * 100) / datasetLabeledRepository.getTotalUsers(dataset.id)
-            percentageOfBelieversInStep = (executionsResultsRepository.getNumberOfBelieversInDay(config.id.toString(), j).toDouble() * 100) / executionsResultsRepository.getTotalUsers(config.id.toString())
+            percentageOfBelieversInStep = (executionsResultsRepository.getNumberOfBelieversInDaySocial(config.id.toString(), j).toDouble() * 100) / executionsResultsRepository.getTotalUsersSocial(config.id.toString())
 
             numberOfDeniersInDay = datasetLabeledRepository.getNumberOfDeniersForDay(dataset.id, i).toDouble()
             percentageOfDeniersInDataset = (numberOfDeniersInDay * 100) / datasetLabeledRepository.getTotalUsers(dataset.id)
-            percentageOfDeniersInStep = (executionsResultsRepository.getNumberOfDeniersInDay(config.id.toString(), j).toDouble() * 100) /executionsResultsRepository.getTotalUsers(config.id.toString())
+            percentageOfDeniersInStep = (executionsResultsRepository.getNumberOfDeniersInDaySocial(config.id.toString(), j).toDouble() * 100) /executionsResultsRepository.getTotalUsersSocial(config.id.toString())
 
             if (i == 0) {
                 PminBelievers = percentageOfBelieversInDataset
@@ -157,7 +116,7 @@ class ResultForExecutionBatchWindow : View() {
             }
 
             i++
-            j += ExecutionsResultsRepository.normalizedForLabeled
+            j += executionsResultsRepository.normalizedAddedValueForLabeledSocial(config.id.toString())
 
         }
 
@@ -167,7 +126,7 @@ class ResultForExecutionBatchWindow : View() {
         val nrmseBelievers = rmseBelievers / (PmaxBelievers - PminBelievers)
         val nrmseDenying = rmseDeniers / (PmaxDeniers - PminDeniers)
 
-        return ErrorForLabeled(
+        return ErrorSocialForLabeled(
             configId = config.id,
             DataSetLabeledId = dataset.id,
             rmseBelievers = rmseBelievers,
@@ -181,39 +140,22 @@ class ResultForExecutionBatchWindow : View() {
     }
 
     fun onCalculateErrorForLabeledClicked() {
-        val configs = executionsResultsRepository.getConfigurations()
-
-        for ((i, config) in configs.withIndex()) {
-            percentageCompletion = "${(i * 100) / configs.size} % of executions completed"
-            val listLabeled = datasetLabeledRepository.getDatasets()
-
-            for (dataset in listLabeled) {
-                executionsResultsRepository.insertErrorLabeled(calculateNrmseLabeled(config, dataset))
-            }
-
-            println("Calculated error labeled $i")
-        }
-        forShowErrorLabeled.text = "Done"
+        println("onCalculateErrorForLabeledClicked")
     }
-
     fun onCalculateErrorClicked() {
         //forShowError.text = calculateNrmseNotLabeled().toString()
-        val configs = executionsResultsRepository.getConfigurations()
+        val configs = executionsResultsRepository.getConfigurationsSocial()
 
         //val list = dbHandler.getListOfExecutions()
         var i = 0
         for (config in configs) {
             percentageCompletion = "${(i * 100) / configs.size} % of executions completed"
-            val listNotLabeled = datasetNotLabeledRepository.getDataSets()
             val listLabeled = datasetLabeledRepository.getDatasets()
-            for (dataset in listNotLabeled) {
-                executionsResultsRepository.insertErrorNotLabeled(calculateNrmseNotLabeled(config, dataset))
-            }
 
             println("Calculated error not labeled")
 
             for (dataset in listLabeled) {
-                executionsResultsRepository.insertErrorLabeled(calculateNrmseLabeled(config, dataset))
+                executionsResultsRepository.insertErrorSocialLabeled(calculateNrmseLabeledSocial(config, dataset))
             }
 
             println("Calculated error labeled")
@@ -227,7 +169,7 @@ class ResultForExecutionBatchWindow : View() {
     override fun onUndock() {
         super.onUndock()
         println("On undock")
-        resultChartSharing.data.removeAll(series1)
+        // resultChartSharing.data.removeAll(series1)
         resultChartPercentages.data.removeAll(series2, series3)
     }
 }

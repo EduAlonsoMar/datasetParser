@@ -178,7 +178,7 @@ class ParserWindow : View() {
                 center = vbox {
                     hbox {
                         addClass(AppStyle.parserLine)
-                        label("Select config file for batch execution") {
+                        label("Select config file for OSN Model") {
                             addClass(AppStyle.regularText)
                         }
                         val textField = textfield {
@@ -199,7 +199,7 @@ class ParserWindow : View() {
 
                     hbox {
                         addClass(AppStyle.parserLine)
-                        label("Select steps file fo batch execution") {
+                        label("Select steps file from OSN Model") {
                             addClass(AppStyle.regularText)
                         }
                         val textField = textfield {
@@ -222,7 +222,84 @@ class ParserWindow : View() {
                         addClass(AppStyle.parserLine)
                         button("parse") {
                             setOnAction {
-                                parserController.parseExecutionResultsFiles()
+                                parserController.parseExecutionResultsFilesFromOSNModel()
+                            }
+                        }
+                    }
+                }
+            }
+
+            borderpane {
+                addClass(AppStyle.parserGroup)
+
+                top = hbox {
+                    maxHeight = 10.0
+                    addClass(AppStyle.divider)
+                }
+
+                left = hbox {
+                    maxWidth = 10.0
+                    addClass(AppStyle.divider)
+                }
+
+                right = hbox {
+                    maxWidth = 10.0
+                    addClass(AppStyle.divider)
+                }
+
+                bottom = hbox {
+                    maxHeight = 10.0
+                    addClass(AppStyle.divider)
+                }
+
+                center = vbox {
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        label("Select config file for Social Fake News Model") {
+                            addClass(AppStyle.regularText)
+                        }
+                        val textField = textfield {
+                            addClass(AppStyle.textField)
+                        }
+                        button("Explore") {
+                            addClass(AppStyle.exploreButton)
+                            setOnAction {
+                                val file = selectFile()
+                                textField.text = file?.path
+                                file?.let {
+                                    parserController.fileWithConfigSelected(it)
+                                }
+
+                            }
+                        }
+                    }
+
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        label("Select steps file from Social Fake News Executions") {
+                            addClass(AppStyle.regularText)
+                        }
+                        val textField = textfield {
+                            addClass(AppStyle.textField)
+                        }
+                        button("Explore") {
+                            addClass(AppStyle.exploreButton)
+                            setOnAction {
+                                val file = selectFile()
+                                textField.text = file?.path
+                                file?.let {
+                                    parserController.fileWithStepsSelected(it)
+                                }
+
+                            }
+                        }
+                    }
+
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        button("parse") {
+                            setOnAction {
+                                parserController.parseExecutionResultsFilesFromSocialFakeNewsModel()
                             }
                         }
                     }

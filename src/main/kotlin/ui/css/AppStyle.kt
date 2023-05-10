@@ -3,6 +3,7 @@ package ui.css
 import javafx.geometry.Pos
 import javafx.scene.paint.Paint
 import tornadofx.*
+import java.io.File
 
 class AppStyle: Stylesheet() {
 
@@ -44,6 +45,7 @@ class AppStyle: Stylesheet() {
             //minWidth = Dimension(1080.0, Dimension.LinearUnits.px)
             //minHeight = Dimension(750.0, Dimension.LinearUnits.px)
             backgroundColor += Paint.valueOf("#AAB7B8")
+            // backgroundImage += File("/Users/edualonso/IdeaProjects/FakeNewsDataSetParser/FakeNewsDataSetParser/src/main/resources/Images/background1.jpg").toURI()
         }
 
         resultScreen {

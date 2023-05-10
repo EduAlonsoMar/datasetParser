@@ -1,10 +1,7 @@
 package data.datasource
 
 import data.database.FakeNewsDataBase
-import data.database.model.Configuration
-import data.database.model.ErrorForLabeled
-import data.database.model.ErrorForNotLabeled
-import data.database.model.Step
+import data.database.model.*
 import org.apache.commons.csv.CSVParser
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -16,11 +13,11 @@ class ExecutionsDataSource : KoinComponent {
 
     private val db: FakeNewsDataBase by inject()
 
-    fun insertConfiguration(config: Configuration): Int {
+    fun insertConfigurationOSN(config: ConfigurationOSN): Int {
         val statement = db.createStatement()
 
         val insertQuery = String.format(
-            insertConfigTemplate,
+            insertConfigOSNTemplate,
             config.topology,
             config.agents,
             config.influencers,
@@ -40,7 +37,7 @@ class ExecutionsDataSource : KoinComponent {
         )
 
         val getIdQuery = String.format(
-            getConfigIdTemplate,
+            getConfigOSNIdTemplate,
             config.topology,
             config.agents,
             config.influencers,
@@ -71,15 +68,98 @@ class ExecutionsDataSource : KoinComponent {
         return -1
     }
 
-    fun insertStep(step: Step) {
+    fun insertConfigurationSocialFakeNews(config: ConfigurationSocialFakeNews): Int {
+        val statement = db.createStatement()
+
+        val insertQuery = String.format(
+            insertConfigSocialTemplate,
+            config.believersCount,
+            config.deniersCount,
+            config.susceptibleCount,
+            config.averageFollowers,
+            config.selectedTopology,
+            config.numberOfTicks,
+            config.totalAgents,
+            config.nodesInBarabasi,
+            config.initialNodesInBarabasi,
+            config.nBots,
+            config.createInterest,
+            config.nOfInterests,
+            config.nOfInfluencersBelievers,
+            config.nOfInfluencersDeniers,
+            config.nOfInfluencersSusceptibles,
+            config.nFollowersToBeInfluencer,
+            config.nBotsConnections,
+            config.pInfl,
+            config.pbelieve,
+            config.pDeny,
+            config.pVacc
+        )
+
+        val getIdQuery = String.format(
+            getConfigSocialIdTemplate,
+            config.believersCount,
+            config.deniersCount,
+            config.susceptibleCount,
+            config.averageFollowers,
+            config.selectedTopology,
+            config.numberOfTicks,
+            config.totalAgents,
+            config.nodesInBarabasi,
+            config.initialNodesInBarabasi,
+            config.nBots,
+            config.createInterest,
+            config.nOfInterests,
+            config.nOfInfluencersBelievers,
+            config.nOfInfluencersDeniers,
+            config.nOfInfluencersSusceptibles,
+            config.nFollowersToBeInfluencer,
+            config.nBotsConnections,
+            config.pInfl,
+            config.pbelieve,
+            config.pDeny,
+            config.pVacc
+        )
+        try {
+            statement.execute(insertQuery)
+            val result = statement.executeQuery(getIdQuery)
+            if (result.next()) {
+                return result.getInt(idConfigurationSocialColumn)
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(insertQuery, e)
+        }
+
+        return -1
+    }
+
+    fun insertStepOSN(step: Step) {
         val statement = db.createStatement()
         val insertQuery = String.format(
-            insertResultStepTemplate,
+            insertResultStepOSNTemplate,
             step.tick,
             step.believers,
             step.factCheckers,
             step.configId,
             step.believersSharing
+        )
+
+        try {
+            statement.execute(insertQuery)
+        } catch (e: SQLException) {
+            db.logQueryError(insertQuery, e)
+        }
+
+    }
+
+    fun insertStepSocialFakeNews(step: Step) {
+        val statement = db.createStatement()
+        val insertQuery = String.format(
+            insertResultStepSocialTemplate,
+            step.tick,
+            step.believers,
+            step.factCheckers,
+            step.configId
         )
 
         try {
@@ -96,7 +176,7 @@ class ExecutionsDataSource : KoinComponent {
         var getIdQuery: String
         for (csvRecord in parser) {
             insertQuery = String.format(
-                insertConfigTemplate,
+                insertConfigOSNTemplate,
                 csvRecord.get("topology"),
                 csvRecord.get("agents"),
                 csvRecord.get("influencers"),
@@ -171,7 +251,7 @@ class ExecutionsDataSource : KoinComponent {
             runCsv = csvRecord.get("run")
             believersSharingCsv = csvRecord.get("believersSharing")
             var insertSept = String.format(
-                insertResultStepTemplate,
+                insertResultStepOSNTemplate,
                 ticksCsv,
                 believersCsv,
                 factCheckersCsv,
@@ -179,13 +259,13 @@ class ExecutionsDataSource : KoinComponent {
                 believersSharingCsv
             )
 
-                try {
-                    statement.execute(insertSept)
-                    // TODO: calculateError for labeled
-                    // TODO: calculateError for not labeled
-                } catch (e: SQLException) {
-                    db.logQueryError(insertSept, e)
-                }
+            try {
+                statement.execute(insertSept)
+                // TODO: calculateError for labeled
+                // TODO: calculateError for not labeled
+            } catch (e: SQLException) {
+                db.logQueryError(insertSept, e)
+            }
 
 
 //            if (i != 0 && i.mod(3) == 0) {
@@ -225,6 +305,28 @@ class ExecutionsDataSource : KoinComponent {
 
     }
 
+    fun insertErrorSocialForLabeled(error: ErrorSocialForLabeled) {
+        val statement = db.createStatement()
+        val query = String.format(
+            Locale.US,
+            insertSocialErrorForLabeled,
+            error.configId,
+            error.DataSetLabeledId,
+            error.rmseBelievers,
+            error.nmseBelievers,
+            error.rmseDeniers,
+            error.nmseDeniers,
+            error.rmseTotal
+        )
+
+        try {
+            statement.execute(query)
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+    }
+
     fun insertErrorNotLabeled(error: ErrorForNotLabeled) {
         val statement = db.createStatement()
         val query = String.format(
@@ -244,15 +346,14 @@ class ExecutionsDataSource : KoinComponent {
     }
 
 
-
-    fun getListOfExecutions(): List<Configuration> {
-        val result = mutableListOf<Configuration>()
+    fun getListOfExecutions(): List<ConfigurationOSN> {
+        val result = mutableListOf<ConfigurationOSN>()
         val statement = db.createStatement()
 
         val queryResult = statement.executeQuery(getListOfExecutionsQuery)
         while (queryResult.next()) {
             result.add(
-                Configuration(
+                ConfigurationOSN(
                     //id = queryResult.getInt(idConfigurationColumn),
                     topology = queryResult.getString(topologyConfigColumn),
                     agents = queryResult.getInt(agentsConfigColumn).toString(),
@@ -278,17 +379,17 @@ class ExecutionsDataSource : KoinComponent {
         return result
     }
 
-    fun getConfigurations(): List<Configuration> {
+    fun getConfigurations(): List<ConfigurationOSN> {
 
         val statement = db.createStatement()
 
-        val resultList = mutableListOf<Configuration>()
+        val resultList = mutableListOf<ConfigurationOSN>()
         try {
             val queryResult = statement.executeQuery(getConfigs)
 
             while (queryResult.next()) {
                 resultList.add(
-                    Configuration(
+                    ConfigurationOSN(
                         topology = queryResult.getString(topologyConfigColumn),
                         agents = queryResult.getInt(agentsConfigColumn).toString(),
                         influencers = queryResult.getInt(influencersConfigColumn).toString(),
@@ -304,7 +405,8 @@ class ExecutionsDataSource : KoinComponent {
                         sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
                         numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
                         sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
-                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn).toString()
+                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
+                            .toString()
                     ).apply {
                         id = queryResult.getInt(idConfigurationColumn)
                     }
@@ -320,7 +422,54 @@ class ExecutionsDataSource : KoinComponent {
         return resultList
     }
 
-    fun getTotalUsersForconfig(configId: String): Int? {
+    fun getConfigurationsSocial(): List<ConfigurationSocialFakeNews> {
+
+        val statement = db.createStatement()
+
+        val resultList = mutableListOf<ConfigurationSocialFakeNews>()
+        try {
+            val queryResult = statement.executeQuery(getConfigsSocial)
+
+            while (queryResult.next()) {
+                resultList.add(
+                    ConfigurationSocialFakeNews(
+                            believersCount = queryResult.getString(believersCountSocialColumn),
+                            deniersCount = queryResult.getString(deniersCountSocialColumn),
+                            susceptibleCount = queryResult.getString(susceptibleCountSocialColumn),
+                            averageFollowers = queryResult.getString(averageFollowersSocialColumn),
+                            selectedTopology = queryResult.getString(selectedTopologySocialColumn),
+                            numberOfTicks = queryResult.getString(numberOfTicksSocialColumn),
+                            totalAgents = queryResult.getString(totalAgentsSocialColumn),
+                            nodesInBarabasi = queryResult.getString(nodesInBarabasiSocialColumn),
+                            initialNodesInBarabasi = queryResult.getString(initialNodesInBarabasiSocialColumn),
+                            nBots = queryResult.getString(nBotsSocialColumn),
+                            createInterest = queryResult.getString(createInterestSocialColumn),
+                            nOfInterests = queryResult.getString(nOfInterestsSocialColumn),
+                            nOfInfluencersBelievers = queryResult.getString(nOfInfluencersBelieversSocialColumn),
+                            nOfInfluencersDeniers = queryResult.getString(nOfInfluencersDeniersSocialColumn),
+                            nOfInfluencersSusceptibles = queryResult.getString(nOfInfluencersSusceptiblesSocialColumn),
+                            nFollowersToBeInfluencer = queryResult.getString(nFollowersToBeInfluencerSocialColumn),
+                            nBotsConnections = queryResult.getString(nBotsConnectionsSocialColumn),
+                            pInfl = queryResult.getString(pInflSocialColumn),
+                            pbelieve = queryResult.getString(pbelieveSocialColumn),
+                            pDeny = queryResult.getString(pDenySocialColumn),
+                            pVacc = queryResult.getString(pVaccSocialColumn)
+                    ).apply {
+                        id = queryResult.getInt(idConfigurationSocialColumn)
+                    }
+                )
+
+            }
+
+        } catch (e: SQLException) {
+            db.logQueryError(getConfigsSocial, e)
+        }
+
+
+        return resultList
+    }
+
+    fun getTotalUsersForConfig(configId: String): Int? {
         val statement = db.createStatement()
         val getQuery = String.format(
             getNumberOfUserInConfigTemplate,
@@ -330,6 +479,24 @@ class ExecutionsDataSource : KoinComponent {
             val resultQuery = statement.executeQuery(getQuery)
             if (resultQuery.next()) {
                 return resultQuery.getInt(agentsConfigColumn)
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(getQuery, e)
+        }
+
+        return null
+    }
+
+    fun getTotalUsersSocialForConfig(configId: String): Int? {
+        val statement = db.createStatement()
+        val getQuery = String.format(
+            getNumberOfUserInConfigSocialTemplate,
+            configId
+        )
+        try {
+            val resultQuery = statement.executeQuery(getQuery)
+            if (resultQuery.next()) {
+                return resultQuery.getInt(totalAgentsSocialColumn)
             }
         } catch (e: SQLException) {
             db.logQueryError(getQuery, e)
@@ -404,6 +571,40 @@ class ExecutionsDataSource : KoinComponent {
         return result
     }
 
+    fun getMaxNumberOfBelieversInStepNormalizedSocial(configId: String, tick: Int, stepsToNormalize: Int): Int {
+        var getQuery: String
+        var result = 0
+        var tmpToCheckResult: Int
+        val statement = db.createStatement()
+        var queryResult: ResultSet
+        for (i in tick..tick + stepsToNormalize) {
+            getQuery = String.format(
+                getBelieversPerTickTemplateSocial,
+                configId,
+                i
+            )
+            try {
+                queryResult = statement.executeQuery(getQuery)
+                if (queryResult.next()) {
+                    tmpToCheckResult = queryResult.getInt(believersStepSocialColumn)
+                    if (i == tick) {
+                        result = tmpToCheckResult
+                    }
+                    result = if (tmpToCheckResult < result) {
+                        tmpToCheckResult
+                    } else {
+                        result
+                    }
+                }
+
+            } catch (e: SQLException) {
+                db.logQueryError(getQuery, e)
+            }
+        }
+
+        return result
+    }
+
     fun getMaxNumberOfDeniersInStepNormalized(configId: String, tick: Int, stepsToNormalize: Int): Int {
         var getQuery: String
         var result = 0
@@ -439,9 +640,61 @@ class ExecutionsDataSource : KoinComponent {
         return result
     }
 
+    fun getMaxNumberOfDeniersInStepNormalizedSocial (configId: String, tick: Int, stepsToNormalize: Int): Int {
+        var getQuery: String
+        var result = 0
+        var tmpToCheckResult: Int
+        val statement = db.createStatement()
+        var queryResult: ResultSet
+        for (i in tick..tick + stepsToNormalize) {
+            getQuery = String.format(
+                getDeniersPerTickTemplateSocial,
+                configId,
+                i
+            )
+            try {
+
+                queryResult = statement.executeQuery(getQuery)
+                if (queryResult.next()) {
+                    tmpToCheckResult = queryResult.getInt(deniersStepSocialColumn)
+                    if (i == tick) {
+                        result = tmpToCheckResult
+                    }
+                    result = if (tmpToCheckResult < result) {
+                        tmpToCheckResult
+                    } else {
+                        result
+                    }
+                }
+
+            } catch (e: SQLException) {
+                db.logQueryError(getQuery, e)
+            }
+        }
+
+        return result
+    }
+
+    fun getNumberOfTicksSocial(configId: String): Int {
+        val statement = db.createStatement()
+        val query = String.format(
+            getNumberOfTicksSocial,
+            configId
+        )
+        try {
+            val queryResult = statement.executeQuery(query)
+            if (queryResult.next()) {
+                return queryResult.getInt(numberOfTicksSocialColumn)
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+        return -1;
+    }
+
     companion object {
 
-        private const val configurationTableName = "Configuration"
+        private const val configurationOSNTableName = "ConfigurationOSN"
         private const val idConfigurationColumn = "idConfiguration"
         private const val topologyConfigColumn = "topology"
         private const val agentsConfigColumn = "agents"
@@ -460,7 +713,7 @@ class ExecutionsDataSource : KoinComponent {
         private const val SharingDebunkingConfigColumn = "SharingDebunking"
         private const val TicksToStartLosingInterestConfigColumn = "TicksToStartLosingInterest"
 
-        private const val stepTableName = "Step"
+        private const val stepOSNTableName = "Step"
         private const val idStepColumn = "idStep"
         private const val tickStepColumn = "tick"
         private const val believersStepColumn = "believers"
@@ -468,7 +721,7 @@ class ExecutionsDataSource : KoinComponent {
         private const val idConfigStepColumn = "idConfig"
         private const val believersSharingColumn = "beleiversSharing"
 
-        private const val errorForLabeledTable = "ErrorForLabeled"
+        private const val errorForLabeledOSNTable = "ErrorForLabeledOSN"
         private const val idErrorForLabeledColumn = "idErrorForLabeled"
         private const val configurationIdColumn = "ConfigurationId"
         private const val dataSetLabeledIdColumn = "DataSetLabeledId"
@@ -478,14 +731,55 @@ class ExecutionsDataSource : KoinComponent {
         private const val nrmseDeniersColumn = "nrmseDeniers"
         private const val rmseTotalColumn = "rmseTotal"
 
-        private const val errorForNotLabeledTable = "ErrorForNotLabeled"
+        private const val errorForLabeledSocialTable = "ErrorForLabeledSocialFakeNews"
+        private const val idErrorForLabeledSocialFakeNewsColunm = "idErrorForLabeledSocialFakeNews"
+        private const val ConfigurationIdSocialColumn = "ConfigurationId"
+        private const val DataSetLabeledIdSocialColumn = "DataSetLabeledId"
+        private const val rmseBelieversSocialColumn = "rmseBelievers"
+        private const val nrmseBelieversSocialColumn = "nrmseBelievers"
+        private const val rmseDeniersSocialColumn = "rmseDeniers"
+        private const val nrmseDeniersSocialColumn = "nrmseDeniers"
+        private const val rmseTotalSocialColumn = "rmseTotal"
+
+        private const val errorForNotLabeledOSNTable = "ErrorForNotLabeledOSN"
         private const val idErrorForNotLabeledColumn = "idErrorForNotLabeled"
         private const val configurationIdErrorForNotLabeledColumn = "ConfigurationId"
         private const val datasetNotLabeledIdErrorForNotLabeledColumn = "DataSetNotLabeledId"
         private const val rmseErrorNotLabeledColumn = "rmse"
         private const val nrmseErrorNotLabeledColumn = "nrmse"
 
-        private const val insertConfigTemplate = ("INSERT INTO $configurationTableName "
+        private const val configurationSocialFakeNewsTableName = "ConfigurationSocialFakeNews"
+        private const val idConfigurationSocialColumn = "idConfigurationSocialFakeNews"
+        private const val believersCountSocialColumn = "believersCount"
+        private const val deniersCountSocialColumn = "denyCount"
+        private const val susceptibleCountSocialColumn = "susceptibleCount"
+        private const val averageFollowersSocialColumn = "averageFollowers"
+        private const val selectedTopologySocialColumn = "selectedTopology"
+        private const val numberOfTicksSocialColumn = "numberOfTicks"
+        private const val totalAgentsSocialColumn = "totalAgents"
+        private const val nodesInBarabasiSocialColumn = "nodesInBarabasi"
+        private const val initialNodesInBarabasiSocialColumn = "initialNodesInBarabasi"
+        private const val nBotsSocialColumn = "nBots"
+        private const val createInterestSocialColumn = "createInterest"
+        private const val nOfInterestsSocialColumn = "nOfInterests"
+        private const val nOfInfluencersBelieversSocialColumn = "nInfluencersBelievers"
+        private const val nOfInfluencersDeniersSocialColumn = "nInfluencersDeniers"
+        private const val nOfInfluencersSusceptiblesSocialColumn = "nInfluencersSusceptibles"
+        private const val nFollowersToBeInfluencerSocialColumn = "nFollowersTobeInfluencer"
+        private const val nBotsConnectionsSocialColumn = "nbotsConnections"
+        private const val pInflSocialColumn = "pInfl"
+        private const val pbelieveSocialColumn = "pbelieve"
+        private const val pDenySocialColumn = "pDeny"
+        private const val pVaccSocialColumn = "pVacc"
+
+        private const val stepSocialTableName = "StepSocialFakeNews"
+        private const val idStepSocialColumn = "idStepSocialFakeNews"
+        private const val tickStepSocialColumn = "tick"
+        private const val believersStepSocialColumn = "believers"
+        private const val deniersStepSocialColumn = "deniers"
+        private const val idConfigStepSocialColumn = "idConfig"
+
+        private const val insertConfigOSNTemplate = ("INSERT INTO $configurationOSNTableName "
                 + "($topologyConfigColumn, $agentsConfigColumn, $influencersConfigColumn, $botsConfigColumn, "
                 + "$workWithTimeDynamicsConfigColumn, $timeAccessForCommonUsersConfigColumn, "
                 + "$timeAccessForBotsConfigColumn, $initialNodesInBarabasiConfigColumn, "
@@ -498,58 +792,143 @@ class ExecutionsDataSource : KoinComponent {
                 + "%s, %s, %s, %s, "
                 + "%s, %s, %s, %s, %s, %s)")
 
-        private const val getConfigIdTemplate = ("SELECT $idConfigurationColumn FROM $configurationTableName WHERE "
-                + "$topologyConfigColumn = \"%s\" AND "
-                + "$agentsConfigColumn = %s AND "
-                + "$influencersConfigColumn = %s AND "
-                + "$botsConfigColumn = %s AND "
-                + "$workWithTimeDynamicsConfigColumn = %s AND "
-                + "$timeAccessForCommonUsersConfigColumn = %s AND "
-                + "$timeAccessForBotsConfigColumn = %s AND "
-                + "$initialNodesInBarabasiConfigColumn = %s AND "
-                + "$nodesInBarabasiConfigColumn = %s AND "
-                + "$numberOfInitialBelieversConfigColumn = %s AND "
-                + "$vulnerabilityMeanConfigColumn = %s AND "
-                + "$recoveryMeanConfigColumn = %s AND "
-                + "$sharingMeanConfigColumn = %s AND "
-                + "$numberOfTicksConfigColumn = %s AND "
-                + "$SharingDebunkingConfigColumn = %s AND "
-                + "$TicksToStartLosingInterestConfigColumn = %s")
+        private const val insertConfigSocialTemplate = ("INSERT INTO $configurationSocialFakeNewsTableName "
+                + "($believersCountSocialColumn, $deniersCountSocialColumn, $susceptibleCountSocialColumn, "
+                + "$averageFollowersSocialColumn, "
+                + "$selectedTopologySocialColumn, $numberOfTicksSocialColumn, "
+                + "$totalAgentsSocialColumn, $nodesInBarabasiSocialColumn, "
+                + "$initialNodesInBarabasiSocialColumn, $nBotsSocialColumn, "
+                + "$createInterestSocialColumn, $nOfInterestsSocialColumn, "
+                + "$nOfInfluencersBelieversSocialColumn, $nOfInfluencersDeniersSocialColumn, "
+                + "$nOfInfluencersSusceptiblesSocialColumn, "
+                + "$nFollowersToBeInfluencerSocialColumn, $nBotsConnectionsSocialColumn, $pInflSocialColumn, "
+                + "$pbelieveSocialColumn,"
+                + "$pDenySocialColumn, $pVaccSocialColumn) "
+                + "VALUES "
+                + "(%s, %s, %s, %s, "
+                + "\"%s\", %s, "
+                + "%s, %s, "
+                + "%s, %s, "
+                + "%s, %s, "
+                + "%s, %s, %s, "
+                + "%s, %s, %s, %s, "
+                + "%s, %s)")
+
+        private const val getConfigOSNIdTemplate =
+            ("SELECT $idConfigurationColumn FROM $configurationOSNTableName WHERE "
+                    + "$believersCountSocialColumn = %s AND "
+                    + "$deniersCountSocialColumn = %s AND "
+                    + "$susceptibleCountSocialColumn = %s AND "
+                    + "$averageFollowersSocialColumn = %s AND "
+                    + "$selectedTopologySocialColumn = \"%s\" AND "
+                    + "$numberOfTicksSocialColumn = %s AND "
+                    + "$totalAgentsSocialColumn = %s AND "
+                    + "$nodesInBarabasiSocialColumn = %s AND "
+                    + "$initialNodesInBarabasiSocialColumn = %s AND "
+                    + "$nBotsSocialColumn = %s AND "
+                    + "$createInterestSocialColumn = %s AND "
+                    + "$nOfInterestsSocialColumn = %s AND "
+                    + "$nOfInfluencersBelieversSocialColumn = %s AND "
+                    + "$nOfInfluencersDeniersSocialColumn = %s AND "
+                    + "$nOfInfluencersSusceptiblesSocialColumn = %s AND "
+                    + "$nFollowersToBeInfluencerSocialColumn = %s AND "
+                    + "$nBotsConnectionsSocialColumn = %s AND "
+                    + "$pInflSocialColumn = %s AND "
+                    + "$pbelieveSocialColumn = %s AND "
+                    + "$pDenySocialColumn = %s AND "
+                    + "$pVaccSocialColumn = %s")
+
+        private const val getConfigSocialIdTemplate =
+            ("SELECT $idConfigurationSocialColumn FROM $configurationSocialFakeNewsTableName WHERE "
+                    + "$believersCountSocialColumn = %s AND "
+                    + "$deniersCountSocialColumn = %s AND "
+                    + "$susceptibleCountSocialColumn = %s AND "
+                    + "$averageFollowersSocialColumn = %s AND "
+                    + "$selectedTopologySocialColumn = \"%s\" AND "
+                    + "$numberOfTicksSocialColumn = %s AND "
+                    + "$totalAgentsSocialColumn = %s AND "
+                    + "$nodesInBarabasiSocialColumn = %s AND "
+                    + "$initialNodesInBarabasiSocialColumn = %s AND "
+                    + "$nBotsSocialColumn = %s AND "
+                    + "$createInterestSocialColumn = %s AND "
+                    + "$nOfInterestsSocialColumn = %s AND "
+                    + "$nOfInfluencersBelieversSocialColumn = %s AND "
+                    + "$nOfInfluencersDeniersSocialColumn = %s AND "
+                    + "$nOfInfluencersSusceptiblesSocialColumn = %s AND "
+                    + "$nFollowersToBeInfluencerSocialColumn = %s AND "
+                    + "$nBotsConnectionsSocialColumn = %s AND "
+                    + "$pInflSocialColumn = %s AND "
+                    + "$pbelieveSocialColumn = %s AND "
+                    + "$pDenySocialColumn = %s AND "
+                    + "$pVaccSocialColumn = %s")
 
         private const val getconfigIdTemplate =
-            "SELECT $idConfigurationColumn FROM $configurationTableName WHERE $idConfigurationColumn = (SELECT MAX($idConfigurationColumn) FROM $configurationTableName)"
+            "SELECT $idConfigurationColumn FROM $configurationOSNTableName WHERE $idConfigurationColumn " +
+                    "= (SELECT MAX($idConfigurationColumn) FROM $configurationOSNTableName)"
 
-        private const val getConfigIds = ("SELECT $idConfigurationColumn FROM $configurationTableName")
+        private const val getConfigIds = ("SELECT $idConfigurationColumn FROM $configurationOSNTableName")
 
-        private const val getConfigs = "SELECT * FROM $configurationTableName"
+        private const val getConfigs = "SELECT * FROM $configurationOSNTableName"
 
-        private const val insertResultStepTemplate = ("INSERT INTO $stepTableName " +
-                "($tickStepColumn, $believersStepColumn, $factCheckersStepColumn, $idConfigStepColumn, $believersSharingColumn) VALUES " +
+        private const val getConfigsSocial = "SELECT * FROM $configurationSocialFakeNewsTableName"
+
+        private const val insertResultStepOSNTemplate = ("INSERT INTO $stepOSNTableName " +
+                "($tickStepColumn, $believersStepColumn, $factCheckersStepColumn, $idConfigStepColumn, " +
+                "$believersSharingColumn) VALUES " +
                 "(%s, %s, %s, %s, %s)")
 
+        private const val insertResultStepSocialTemplate = ("INSERT INTO $stepSocialTableName " +
+                "($tickStepSocialColumn, $believersStepSocialColumn, $deniersStepSocialColumn, " +
+                "$idConfigStepSocialColumn) VALUES " +
+                "(%s, %s, %s, %s)")
+
         private const val getNumberOfUserInConfigTemplate =
-            ("SELECT $agentsConfigColumn FROM $configurationTableName WHERE $idConfigurationColumn = %s")
+            ("SELECT $agentsConfigColumn FROM $configurationOSNTableName WHERE $idConfigurationColumn = %s")
+
+        private const val getNumberOfUserInConfigSocialTemplate =
+            ("SELECT $totalAgentsSocialColumn FROM $configurationSocialFakeNewsTableName " +
+                    "WHERE $idConfigurationSocialColumn = %s")
 
         private const val getBelieversSharingPerTickTemplate =
-            ("SELECT $believersSharingColumn FROM $stepTableName WHERE $idConfigStepColumn = %s AND $tickStepColumn = %d")
+            ("SELECT $believersSharingColumn FROM $stepOSNTableName " +
+                    "WHERE $idConfigStepColumn = %s AND $tickStepColumn = %d")
 
         private const val getBelieversPerTickTemplate =
-            "SELECT $believersStepColumn FROM $stepTableName WHERE $idConfigStepColumn = %s AND $tickStepColumn = %d"
+            "SELECT $believersStepColumn FROM $stepOSNTableName " +
+                    "WHERE $idConfigStepColumn = %s AND $tickStepColumn = %d"
+
+        private const val getBelieversPerTickTemplateSocial =
+            "SELECT $believersStepSocialColumn FROM $stepSocialTableName " +
+                    "WHERE $idConfigStepSocialColumn = %s AND $tickStepSocialColumn = %d"
 
         private const val getDeniersPerTickTemplate =
-            "SELECT $factCheckersStepColumn FROM $stepTableName WHERE $idConfigStepColumn = %s AND $tickStepColumn = %d"
+            "SELECT $factCheckersStepColumn FROM $stepOSNTableName " +
+                    "WHERE $idConfigStepColumn = %s AND $tickStepColumn = %d"
 
-        private const val getListOfExecutionsQuery = "SELECT * FROM $configurationTableName"
+        private const val getDeniersPerTickTemplateSocial =
+            "SELECT $deniersStepSocialColumn FROM $stepSocialTableName " +
+                    "WHERE $idConfigStepSocialColumn = %s AND $tickStepSocialColumn = %d"
 
-        private const val insertErrorForLabeled = "INSERT INTO $errorForLabeledTable " +
+        private const val getListOfExecutionsQuery = "SELECT * FROM $configurationOSNTableName"
+
+        private const val insertErrorForLabeled = "INSERT INTO $errorForLabeledOSNTable " +
                 "($configurationIdColumn, $dataSetLabeledIdColumn, $rmseBelieversColumn, " +
                 "$nrmseBelieversColumn, $rmseDeniersColumn, $nrmseDeniersColumn, $rmseTotalColumn) VALUES " +
                 "(%d, %d, %,.4f, %,.4f, %,.4f, %,.4f, %,.4f)"
 
-        private const val insertErrorForNotLabeled = "INSERT INTO $errorForNotLabeledTable " +
+        private const val insertSocialErrorForLabeled = "INSERT INTO $errorForLabeledSocialTable " +
+                "($ConfigurationIdSocialColumn, $DataSetLabeledIdSocialColumn, $rmseBelieversSocialColumn, " +
+                "$nrmseBelieversSocialColumn, $rmseDeniersSocialColumn, " +
+                "$nrmseDeniersSocialColumn, $rmseTotalSocialColumn) VALUES " +
+                "(%d, %d, %,.4f, %,.4f, %,.4f, %,.4f, %,.4f)"
+
+        private const val insertErrorForNotLabeled = "INSERT INTO $errorForNotLabeledOSNTable " +
                 "($configurationIdErrorForNotLabeledColumn, $datasetNotLabeledIdErrorForNotLabeledColumn, " +
                 "$rmseErrorNotLabeledColumn, $nrmseErrorNotLabeledColumn) VALUES " +
                 "(%d, %d, %,.4f, %.4f)"
+
+        private const val getNumberOfTicksSocial = "SELECT $numberOfTicksSocialColumn " +
+                "FROM $configurationSocialFakeNewsTableName WHERE $idConfigurationSocialColumn = %s"
 
     }
 }

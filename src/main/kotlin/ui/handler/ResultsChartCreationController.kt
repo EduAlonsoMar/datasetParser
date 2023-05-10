@@ -4,6 +4,7 @@ import data.repository.DatasetLabeledRepository
 import data.repository.DatasetNotLabeledRepository
 import data.repository.ExecutionsResultsRepository
 import data.repository.ExecutionsResultsRepository.Companion.stepsForExecution
+import data.repository.ExecutionsResultsRepository.Companion.stepsForExecutionSocial
 import javafx.collections.ObservableList
 import javafx.scene.chart.XYChart
 import tornadofx.Controller
@@ -131,6 +132,30 @@ class ResultsChartCreationController : Controller() {
         return result
     }
 
+    fun createUsersSharingFakesInResultSeriesSocial(configId: String): ObservableList<XYChart.Data<String, Number>> {
+        val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
+
+        var data: XYChart.Data<String, Number>
+        var hours: String
+        var i = 0
+        while (i < stepsForExecution) {
+            hours = String.format(templateForXAxis, i / 3)
+
+            data = XYChart.Data<String, Number>(
+                hours,
+                (executionsResultsRepository.getNumberOfUserSendingInAnHour(
+                    configId,
+                    i
+                ) * 100) / (executionsResultsRepository.getTotalUsers(configId))
+            )
+
+            result.add(data)
+            i += 3
+        }
+
+        return result
+    }
+
     fun createBelieversInResult(configId: String): ObservableList<XYChart.Data<String, Number>> {
         val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
 
@@ -155,6 +180,31 @@ class ResultsChartCreationController : Controller() {
         return result
     }
 
+    fun createBelieversInResultSocial(configId: String): ObservableList<XYChart.Data<String, Number>> {
+        val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
+
+        var data: XYChart.Data<String, Number>
+        var days: String
+        var i = 0
+        val divider = (executionsResultsRepository.getNumberOfTicksSocial(configId) / 15)
+        while (i < stepsForExecutionSocial) {
+            days = String.format(templateForXAxis, i / divider)
+
+            data = XYChart.Data<String, Number>(
+                days,
+                (executionsResultsRepository.getNumberOfBelieversInDaySocial(
+                    configId,
+                    i
+                ) * 100) / (executionsResultsRepository.getTotalUsersSocial(configId))
+            )
+
+            result.add(data)
+            i += 33
+        }
+
+        return result
+    }
+
     fun createDeniersInResult(configId: String): ObservableList<XYChart.Data<String, Number>> {
         val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
 
@@ -174,6 +224,31 @@ class ResultsChartCreationController : Controller() {
 
             result.add(data)
             i += 6
+        }
+
+        return result
+    }
+
+    fun createDeniersInResultSocial(configId: String): ObservableList<XYChart.Data<String, Number>> {
+        val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
+
+        var data: XYChart.Data<String, Number>
+        var days: String
+        var i = 0
+        val divider = (executionsResultsRepository.getNumberOfTicksSocial(configId) / 15)
+        while (i < stepsForExecutionSocial) {
+            days = String.format(templateForXAxis, i / divider)
+
+            data = XYChart.Data<String, Number>(
+                days,
+                (executionsResultsRepository.getNumberOfDeniersInDaySocial(
+                    configId,
+                    i
+                ) * 100) / (executionsResultsRepository.getTotalUsersSocial(configId))
+            )
+
+            result.add(data)
+            i += 33
         }
 
         return result

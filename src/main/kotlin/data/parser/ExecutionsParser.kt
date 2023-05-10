@@ -31,8 +31,33 @@ class ExecutionsParser(val parserForSteps: CSVParser,
         const val believersColumn = "believers"
         const val factCheckers = "factCheckers"
 
+        const val believersSocialColumn = "Believers"
+        const val deniersSocialColumn = "Fact Checkers"
+
         const val numberSteps = "number_steps"
         const val sharingDebunking = "sharing_debunking"
         const val ticksLostInterest = "ticks_lose_interest"
+
+        const val configSocialIdColumn = "run"
+        const val denyProbSocialColumn = "deny_prob"
+        const val selectedTopologyColumn = "selected_topology"
+        // const val initialNodesBarabasiColumn = "initial_nodes_in_barabasi"
+        const val nFollowersInfluencersColumn = "n_followers_to_be_influencer"
+        const val believeProbColumn = "believe_prob"
+        const val nInfluencersBelieversColumn = "influencer_count_believers"
+        const val nOfInterestsColumn = "number_of_interests"
+        const val vaccProbColumn = "vacc_prob"
+        const val nInfluencersSusceptiblesColumn = "influencer_count_susceptibles"
+        const val influencersProbColumn = "influencer_prob"
+        const val nBelieversColumn = "believer_count"
+        const val nAgentsColumn = "user_count"
+        const val createInterestsColumn = "create_interests"
+        const val nTicksColumn = "number_of_ticks"
+        const val nodesInBarabasiColumn = "nodes_in_barabasi"
+        const val nBotsConnectionsColumn = "n_bots_connections"
+        const val denierCountColumn = "denier_count"
+        const val avgFollowersColumn = "avg_followers"
+        const val nInfluencersDeniersColumn = "influencer_count_deniers"
+        const val nBotsColumn = "bots_count"
     }
 }

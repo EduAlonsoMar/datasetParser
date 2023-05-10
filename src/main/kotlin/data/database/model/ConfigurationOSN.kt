@@ -1,6 +1,6 @@
 package data.database.model
 
-data class Configuration(
+data class ConfigurationOSN(
     val topology: String? = null,
     val agents: String? = null,
     val influencers: String? = null,

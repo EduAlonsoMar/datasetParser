@@ -86,7 +86,7 @@ class ResultWindow : View() {
 
             hbox {
                 addClass(AppStyle.parserLine)
-                label("ResultSets") {
+                label("ResultSets From OSN Realistic model") {
                     addClass(AppStyle.regularText)
                 }
             }
@@ -106,11 +106,33 @@ class ResultWindow : View() {
                 }
             }
 
+            hbox {
+                addClass(AppStyle.parserLine)
+                label("ResultSets From Social Fake News model") {
+                    addClass(AppStyle.regularText)
+                }
+            }
+
+            hbox {
+                addClass(AppStyle.parserLine)
+
+                val combo = combobox {
+                    id = "resultSteps"
+                    items = executionsResultsRepository.getConfigurationsSocialIds().toObservable()
+                }
+
+                button("Show Results") {
+                    setOnAction {
+                        find<ResultForExecutionsSocialWindow>(mapOf("configSelected" to combo.selectedItem)).openWindow()
+                    }
+                }
+            }
+
             vbox {
                 addClass(AppStyle.verticalLayoutWithBorder)
                 hbox {
                     addClass(AppStyle.parserLine)
-                    label("Comparison between datasets and executions") {
+                    label("Comparison between datasets and executions FROM OSN Realistic Model") {
                         addClass(AppStyle.regularText)
                     }
                 }
@@ -166,6 +188,49 @@ class ResultWindow : View() {
 
                         button("Show Comparison").setOnAction {
                             find<ResultForComparisonLabeledWindow>(
+                                mapOf(
+                                    DATASET_LABELED_PARAM to datasetLabeled.text,
+                                    ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.text
+                                )
+                            ).openWindow()
+                        }
+                    }
+
+
+                }
+            }
+
+            vbox {
+                addClass(AppStyle.verticalLayoutWithBorder)
+                hbox {
+                    addClass(AppStyle.parserLine)
+                    label("Comparison between datasets and executions From Social Fake News model") {
+                        addClass(AppStyle.regularText)
+                    }
+                }
+                vbox {
+                    addClass(AppStyle.parserLine)
+                    val executionLabeled = hbox {
+                        label("execution id") {
+                            addClass(AppStyle.textField)
+                        }
+                        label("Dataset labeled id") {
+                            addClass(AppStyle.textField)
+                        }
+
+                    }
+
+                    val datasetLabeled = hbox {
+                        val execution = textfield {
+                            addClass(AppStyle.textField)
+                        }
+
+                        val datasetLabeled = textfield {
+                            addClass(AppStyle.textField)
+                        }
+
+                        button("Show Comparison").setOnAction {
+                            find<ResultForComparisonLabeledSocialWindow>(
                                 mapOf(
                                     DATASET_LABELED_PARAM to datasetLabeled.text,
                                     ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.text
