@@ -26,9 +26,9 @@
                 <Button text="Parse Datasets" onAction="#onParseDatasetClicked"/>
             </HBox>
 
-            <HBox alignment="BASELINE_LEFT">
+            <!--HBox alignment="BASELINE_LEFT">
                 <Button text="Execute Batch" onAction="#onExecBatchClicked"/>
-            </HBox>
+            </HBox-->
 
             <HBox alignment="BASELINE_LEFT">
 

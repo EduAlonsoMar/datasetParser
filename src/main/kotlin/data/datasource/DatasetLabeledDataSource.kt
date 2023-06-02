@@ -176,6 +176,25 @@ open class DatasetLabeledDataSource : KoinComponent {
         return result
     }
 
+    fun getDataSet(id: Int): DatasetLabeled {
+        val statement = db.createStatement()
+        val query = String.format(getDataSetTemplate, id)
+        try {
+            val rs = statement.executeQuery(query)
+            if (rs.next()) {
+                return DatasetLabeled(
+                    id = id,
+                    name = rs.getString(dataSetLabeledNameColumn),
+                    description = rs.getString(dataSetLabeledDescriptionColumn)
+                )
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+        return DatasetLabeled(id, "", "")
+    }
+
     private fun getNumberOfUsersInDayDependingOnLabel(day: Calendar, label: String): Int? {
         val query = String.format(
             getNumberOfUsersPerDayAndLabelTemplate,
@@ -296,6 +315,7 @@ open class DatasetLabeledDataSource : KoinComponent {
         const val oldestDateTemplate =
             "SELECT Max($opinionDateName) as oldestDate FROM $opinionTableName WHERE $opinionDatasetIdName = %s"
         const val getNamesListQuery = "SELECT * FROM $dataSetLabeledTableName"
+        const val getDataSetTemplate = "SELECT * FROM $dataSetLabeledTableName WHERE $dataSetLabeledIdColumnName = %s"
         const val getNumberOfUsersPerDayAndLabelTemplate =
             "SELECT distinct count(distinct($opinionUserIdName)) as users FROM $opinionTableName WHERE $opinionDateName <= \"%s-%s-%s\" and $opinionLabel = \"%s\""
         const val getUserInDayTemplate =

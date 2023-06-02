@@ -1,6 +1,8 @@
 package data.repository
 
 import data.database.model.*
+import data.datasource.DatasetLabeledDataSource
+import data.datasource.DatasetNotLabeledDataSource
 import data.datasource.ExecutionsDataSource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -8,6 +10,8 @@ import org.koin.core.component.inject
 class ExecutionsResultsRepository : KoinComponent {
 
     private val executionsDataSource: ExecutionsDataSource by inject()
+    private val datasetNotLabeledDataSource: DatasetNotLabeledDataSource by inject()
+    private val datasetLabeledDataSource: DatasetLabeledDataSource by inject()
     // val totalUsers =
 
     fun insertConfigurationOSN(config: ConfigurationOSN): Int {
@@ -30,12 +34,39 @@ class ExecutionsResultsRepository : KoinComponent {
         return executionsDataSource.getConfigurations().map { it.id.toString() }
     }
 
+    fun getBestOSNConfigurationsForDataSetNotLabeled(dataset: String): List<String> {
+
+        return executionsDataSource
+            .getBestOSNConfigurationsForDataSetNotLabeled(
+                datasetNotLabeledDataSource.getFakeNewsIdFromTitle(dataset)
+            ).map {
+                it.id.toString()
+            }
+    }
+
+    fun getBestOSNConfigurationsForDataSetLabeled(dataset: String): List<String> {
+        return executionsDataSource
+            .getBestOSNConfigurationsForDataSetLabeled(
+                datasetLabeledDataSource.getDataSetId(dataset)
+            ).map {
+                it.id.toString()
+            }
+    }
+
     fun getConfigurations(): List<ConfigurationOSN> {
         return executionsDataSource.getConfigurations()
     }
 
+    fun getConfigurationOSN(id: Int): ConfigurationOSN {
+        return executionsDataSource.getConfigurationOSN(id)
+    }
+
     fun getConfigurationsSocial(): List<ConfigurationSocialFakeNews> {
         return executionsDataSource.getConfigurationsSocial()
+    }
+
+    fun getConfigurationSocial(id: Int): ConfigurationSocialFakeNews {
+        return executionsDataSource.getConfigurationSocial(id)
     }
 
     fun getConfigurationsSocialIds(): List<String> {

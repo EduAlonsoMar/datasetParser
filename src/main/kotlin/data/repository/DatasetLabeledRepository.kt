@@ -39,6 +39,10 @@ class DatasetLabeledRepository (): KoinComponent{
         return datasetLabeledDataSource.getDataSetList()
     }
 
+    fun getDataset(configId: Int): DatasetLabeled {
+        return datasetLabeledDataSource.getDataSet(configId)
+    }
+
 //    fun totalDaysInDataSet(datasetToShowTimeline: String): Long {
 //        val earliestDate: Date? = datasetLabeledDataSource.getEarliestDate(datasetToShowTimeline)
 //        val oldestDate: Date? = datasetLabeledDataSource.getOldestDate(datasetToShowTimeline)

@@ -13,10 +13,10 @@ class HomeWindow: View() {
         replaceWith(ParserWindow::class, ViewTransition.Slide(0.3.seconds, ViewTransition.Direction.LEFT))
     }
 
-    fun onExecBatchClicked() {
+    /*fun onExecBatchClicked() {
         println("execBatchClicked")
         replaceWith<ExecuteBatchWindow>()
-    }
+    }*/
 
     fun onShowResultsClicked() {
         println("Show Results clicked")

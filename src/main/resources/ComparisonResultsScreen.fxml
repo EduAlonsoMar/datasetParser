@@ -33,14 +33,14 @@
                 </yAxis>
             </LineChart>
 
-            <LineChart fx:id="chartConfig">
+            <!--LineChart fx:id="chartConfig">
                 <xAxis>
                     <CategoryAxis side="BOTTOM" label="Hours"/>
                 </xAxis>
                 <yAxis>
                     <NumberAxis side="LEFT" label="\% of users sharing info"/>
                 </yAxis>
-            </LineChart>
+            </LineChart-->
 
         </VBox>
     </center>

@@ -14,7 +14,7 @@ class ResultForComparisonLabeledSocialWindow: View() {
     private var executionSelected: String? = null
 
     private val chartLabeled: LineChart<String, Number> by fxid()
-    private val chartConfig: LineChart<String, Number> by fxid()
+    // private val chartConfig: LineChart<String, Number> by fxid()
 
     private val resultsChartCreationController: ResultsChartCreationController by inject()
 
@@ -29,19 +29,18 @@ class ResultForComparisonLabeledSocialWindow: View() {
         dataSetLabeled = params[DATASET_LABELED_PARAM] as? String
         executionSelected = params[EXECUTION_PARAM] as? String
 
-        chartLabeled.title = "Dataset not labeled with id $dataSetLabeled"
-        chartConfig.title = "Execution with id $executionSelected"
+        chartLabeled.title = "Dataset $dataSetLabeled and execution $executionSelected"
 
         dataSetLabeled?.let { datasetSelectedId ->
             seriesBelievers = XYChart.Series(
-                "% Believers per day",
+                "% Believers per day in dataset",
                 resultsChartCreationController.createBelieversSeriesInLabeledDatasetId(
                     Integer.parseInt(datasetSelectedId)
                 )
             )
 
             seriesDeniers = XYChart.Series(
-                "% Deniers per day",
+                "% Deniers per day in dataset",
                 resultsChartCreationController.createDeniersSeriesInLabeledDatasetId(
                     Integer.parseInt(datasetSelectedId)
                 )
@@ -50,25 +49,23 @@ class ResultForComparisonLabeledSocialWindow: View() {
 
         executionSelected?.let { idSelected ->
             seriesExecutionBelievers = XYChart.Series(
-                "% Believers per day",
+                "% Believers per day in model",
                 resultsChartCreationController.createBelieversInResultSocial(idSelected)
             )
 
             seriesExecutionDeniers = XYChart.Series(
-                "% Deniers per day",
+                "% Deniers per day in model",
                 resultsChartCreationController.createDeniersInResultSocial(idSelected)
             )
         }
 
-        chartLabeled.data.addAll(seriesBelievers, seriesDeniers)
-        chartConfig.data.addAll(seriesExecutionBelievers, seriesExecutionDeniers)
+        chartLabeled.data.addAll(seriesBelievers, seriesDeniers, seriesExecutionBelievers, seriesExecutionDeniers)
     }
 
     override fun onUndock() {
         super.onUndock()
 
-        chartLabeled.data.removeAll(seriesBelievers, seriesDeniers)
-        chartConfig.data.removeAll(seriesExecutionBelievers, seriesExecutionDeniers)
+        chartLabeled.data.removeAll(seriesBelievers, seriesDeniers, seriesExecutionBelievers, seriesExecutionDeniers)
     }
 
 

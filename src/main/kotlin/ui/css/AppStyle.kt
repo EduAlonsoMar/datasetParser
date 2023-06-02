@@ -20,6 +20,8 @@ class AppStyle: Stylesheet() {
 
         val textField by cssclass()
 
+        val comboBoxWithLimit by cssclass()
+
         val parserLine by cssclass()
 
         val parserGroup by cssclass()
@@ -90,6 +92,10 @@ class AppStyle: Stylesheet() {
 
         textField {
             minWidth = Dimension(300.0, Dimension.LinearUnits.px)
+        }
+
+        comboBoxWithLimit {
+            maxWidth = Dimension(300.0, Dimension.LinearUnits.px)
         }
 
         verticalSeparator {

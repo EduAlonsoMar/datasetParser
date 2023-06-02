@@ -14,7 +14,7 @@ class ResultForComparisonWindow : View() {
     private var executionSelected: String? = null
 
     private val chartNotLabeled: LineChart<String, Number> by fxid()
-    private val chartConfig: LineChart<String, Number> by fxid()
+    // private val chartConfig: LineChart<String, Number> by fxid()
 
     private val resultsChartCreationController: ResultsChartCreationController by inject()
 
@@ -28,34 +28,32 @@ class ResultForComparisonWindow : View() {
         dataSetNotLabeled = params[DATASET_NOT_LABELED_PARAM] as? String
         executionSelected = params[EXECUTION_PARAM] as? String
 
-        chartNotLabeled.title = "Dataset not labeled with id $dataSetNotLabeled"
-        chartConfig.title = "Execution with id $executionSelected"
+        chartNotLabeled.title = "Dataset not labeled with title $dataSetNotLabeled"
+        // chartConfig.title = "Execution with id $executionSelected"
 
         executionSelected?.let { idSelected ->
             seriesExecution = XYChart.Series(
-                "Users sharing fake news per hour",
+                "Users sharing fake news per hour in model",
                 resultsChartCreationController.createUsersSharingFakesInResultSeries(idSelected)
             )
         }
 
-        dataSetNotLabeled?.let { datasetNotLabeledId ->
+        dataSetNotLabeled?.let { datasetNotLabeledTitle ->
             seriesDatasetNotLabeled = XYChart.Series(
-                "Users sharing fake news per hour",
-                resultsChartCreationController.createUsersSharingFromDatasetNotLabeledId(
-                    Integer.parseInt(dataSetNotLabeled)
+                "Users sharing fake news per hour in dataset",
+                resultsChartCreationController.createUsersSharingFromDatasetNotLabeledTitle(
+                    datasetNotLabeledTitle
                 )
             )
         }
-        chartNotLabeled.data.addAll(seriesDatasetNotLabeled)
-        chartConfig.data.addAll(seriesExecution)
+        chartNotLabeled.data.addAll(seriesDatasetNotLabeled, seriesExecution)
 
     }
 
     override fun onUndock() {
         super.onUndock()
 
-        chartConfig.data.removeAll(seriesExecution)
-        chartNotLabeled.data.removeAll(seriesDatasetNotLabeled)
+        chartNotLabeled.data.removeAll(seriesDatasetNotLabeled, seriesExecution)
     }
 
     companion object {

@@ -422,6 +422,136 @@ class ExecutionsDataSource : KoinComponent {
         return resultList
     }
 
+    fun getBestOSNConfigurationsForDataSetNotLabeled(datasetId: Int): List<ConfigurationOSN> {
+        val statement = db.createStatement()
+
+        val resultList = mutableListOf<ConfigurationOSN>()
+        val query = String.format(getBest10Configs, datasetId.toString())
+        try {
+            val queryResult = statement.executeQuery(query)
+
+            while (queryResult.next()) {
+                resultList.add(
+                    ConfigurationOSN(
+                        topology = queryResult.getString(topologyConfigColumn),
+                        agents = queryResult.getInt(agentsConfigColumn).toString(),
+                        influencers = queryResult.getInt(influencersConfigColumn).toString(),
+                        bots = queryResult.getInt(botsConfigColumn).toString(),
+                        workWithTimeDynamics = queryResult.getBoolean(workWithTimeDynamicsConfigColumn).toString(),
+                        timeAccessForCommonUsers = queryResult.getInt(timeAccessForCommonUsersConfigColumn).toString(),
+                        timeAccessForBots = queryResult.getInt(timeAccessForBotsConfigColumn).toString(),
+                        initialNodesBarabasi = queryResult.getInt(initialNodesInBarabasiConfigColumn).toString(),
+                        nodesInBarabasi = queryResult.getInt(nodesInBarabasiConfigColumn).toString(),
+                        numberOfInitialBelievers = queryResult.getInt(numberOfInitialBelieversConfigColumn).toString(),
+                        vulnerabilityMean = queryResult.getDouble(vulnerabilityMeanConfigColumn).toString(),
+                        recoveryMean = queryResult.getDouble(recoveryMeanConfigColumn).toString(),
+                        sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
+                        numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
+                        sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
+                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
+                            .toString()
+                    ).apply {
+                        id = queryResult.getInt(idConfigurationColumn)
+                    }
+                )
+
+            }
+
+        } catch (e: SQLException) {
+            db.logQueryError(getConfigIds, e)
+        }
+
+
+        return resultList
+    }
+
+    fun getBestOSNConfigurationsForDataSetLabeled(datasetLabeledId: Int): List<ConfigurationOSN> {
+        val statement = db.createStatement()
+
+        val resultList = mutableListOf<ConfigurationOSN>()
+        val query = String.format(getBest10ConfigsForOSNLabeled, datasetLabeledId.toString())
+        try {
+            val queryResult = statement.executeQuery(query)
+
+            while (queryResult.next()) {
+                resultList.add(
+                    ConfigurationOSN(
+                        topology = queryResult.getString(topologyConfigColumn),
+                        agents = queryResult.getInt(agentsConfigColumn).toString(),
+                        influencers = queryResult.getInt(influencersConfigColumn).toString(),
+                        bots = queryResult.getInt(botsConfigColumn).toString(),
+                        workWithTimeDynamics = queryResult.getBoolean(workWithTimeDynamicsConfigColumn).toString(),
+                        timeAccessForCommonUsers = queryResult.getInt(timeAccessForCommonUsersConfigColumn).toString(),
+                        timeAccessForBots = queryResult.getInt(timeAccessForBotsConfigColumn).toString(),
+                        initialNodesBarabasi = queryResult.getInt(initialNodesInBarabasiConfigColumn).toString(),
+                        nodesInBarabasi = queryResult.getInt(nodesInBarabasiConfigColumn).toString(),
+                        numberOfInitialBelievers = queryResult.getInt(numberOfInitialBelieversConfigColumn).toString(),
+                        vulnerabilityMean = queryResult.getDouble(vulnerabilityMeanConfigColumn).toString(),
+                        recoveryMean = queryResult.getDouble(recoveryMeanConfigColumn).toString(),
+                        sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
+                        numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
+                        sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
+                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
+                            .toString()
+                    ).apply {
+                        id = queryResult.getInt(idConfigurationColumn)
+                    }
+                )
+
+            }
+
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+
+        return resultList
+    }
+
+    fun getConfigurationOSN(id: Int): ConfigurationOSN {
+        val statement = db.createStatement()
+        val query = String.format(getConfigOSN, id.toString())
+        try {
+
+            val queryResult = statement.executeQuery(query)
+
+            while (queryResult.next()) {
+
+                    ConfigurationOSN(
+                        topology = queryResult.getString(topologyConfigColumn),
+                        agents = queryResult.getInt(agentsConfigColumn).toString(),
+                        influencers = queryResult.getInt(influencersConfigColumn).toString(),
+                        bots = queryResult.getInt(botsConfigColumn).toString(),
+                        workWithTimeDynamics = queryResult.getBoolean(workWithTimeDynamicsConfigColumn).toString(),
+                        timeAccessForCommonUsers = queryResult.getInt(timeAccessForCommonUsersConfigColumn).toString(),
+                        timeAccessForBots = queryResult.getInt(timeAccessForBotsConfigColumn).toString(),
+                        initialNodesBarabasi = queryResult.getInt(initialNodesInBarabasiConfigColumn).toString(),
+                        nodesInBarabasi = queryResult.getInt(nodesInBarabasiConfigColumn).toString(),
+                        numberOfInitialBelievers = queryResult.getInt(numberOfInitialBelieversConfigColumn).toString(),
+                        vulnerabilityMean = queryResult.getDouble(vulnerabilityMeanConfigColumn).toString(),
+                        recoveryMean = queryResult.getDouble(recoveryMeanConfigColumn).toString(),
+                        sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
+                        numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
+                        sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
+                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
+                            .toString()
+                    ).apply {
+                        this.id = queryResult.getInt(idConfigurationColumn)
+                    }
+
+
+            }
+
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+
+        return ConfigurationOSN().apply {
+            this.id = id
+        }
+    }
+
     fun getConfigurationsSocial(): List<ConfigurationSocialFakeNews> {
 
         val statement = db.createStatement()
@@ -467,6 +597,47 @@ class ExecutionsDataSource : KoinComponent {
 
 
         return resultList
+    }
+
+    fun getConfigurationSocial(configurationId: Int): ConfigurationSocialFakeNews {
+        val statement = db.createStatement()
+        val query = String.format(getConfigSocialTemplate, configurationId.toString())
+        try {
+            val queryResult = statement.executeQuery(query)
+            if (queryResult.next()) {
+                return ConfigurationSocialFakeNews(
+                    believersCount = queryResult.getString(believersCountSocialColumn),
+                    deniersCount = queryResult.getString(deniersCountSocialColumn),
+                    susceptibleCount = queryResult.getString(susceptibleCountSocialColumn),
+                    averageFollowers = queryResult.getString(averageFollowersSocialColumn),
+                    selectedTopology = queryResult.getString(selectedTopologySocialColumn),
+                    numberOfTicks = queryResult.getString(numberOfTicksSocialColumn),
+                    totalAgents = queryResult.getString(totalAgentsSocialColumn),
+                    nodesInBarabasi = queryResult.getString(nodesInBarabasiSocialColumn),
+                    initialNodesInBarabasi = queryResult.getString(initialNodesInBarabasiSocialColumn),
+                    nBots = queryResult.getString(nBotsSocialColumn),
+                    createInterest = queryResult.getString(createInterestSocialColumn),
+                    nOfInterests = queryResult.getString(nOfInterestsSocialColumn),
+                    nOfInfluencersBelievers = queryResult.getString(nOfInfluencersBelieversSocialColumn),
+                    nOfInfluencersDeniers = queryResult.getString(nOfInfluencersDeniersSocialColumn),
+                    nOfInfluencersSusceptibles = queryResult.getString(nOfInfluencersSusceptiblesSocialColumn),
+                    nFollowersToBeInfluencer = queryResult.getString(nFollowersToBeInfluencerSocialColumn),
+                    nBotsConnections = queryResult.getString(nBotsConnectionsSocialColumn),
+                    pInfl = queryResult.getString(pInflSocialColumn),
+                    pbelieve = queryResult.getString(pbelieveSocialColumn),
+                    pDeny = queryResult.getString(pDenySocialColumn),
+                    pVacc = queryResult.getString(pVaccSocialColumn)
+                ).apply {
+                    id = queryResult.getInt(idConfigurationSocialColumn)
+                }
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+        return ConfigurationSocialFakeNews().apply {
+            id = configurationId
+        }
     }
 
     fun getTotalUsersForConfig(configId: String): Int? {
@@ -870,7 +1041,15 @@ class ExecutionsDataSource : KoinComponent {
 
         private const val getConfigs = "SELECT * FROM $configurationOSNTableName"
 
+        private const val getBest10Configs = "SELECT * FROM $configurationOSNTableName, ${errorForNotLabeledOSNTable} WHERE ${datasetNotLabeledIdErrorForNotLabeledColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY ${nrmseErrorNotLabeledColumn} ASC LIMIT 10"
+
+        private const val getBest10ConfigsForOSNLabeled = "SELECT *, (${errorForLabeledOSNTable}.${nrmseBelieversColumn} + ${errorForLabeledOSNTable}.${nrmseDeniersColumn}) as totalNRMSE FROM ${configurationOSNTableName}, ${errorForLabeledOSNTable} WHERE ${dataSetLabeledIdColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY totalNRMSE ASC LIMIT 10"
+
+        private const val getConfigOSN = "SELECT * FROM $configurationOSNTableName WHERE $idConfigurationColumn = %s"
+
         private const val getConfigsSocial = "SELECT * FROM $configurationSocialFakeNewsTableName"
+
+        private const val getConfigSocialTemplate = "SELECT * FROM $configurationSocialFakeNewsTableName WHERE $idConfigurationSocialColumn = %s"
 
         private const val insertResultStepOSNTemplate = ("INSERT INTO $stepOSNTableName " +
                 "($tickStepColumn, $believersStepColumn, $factCheckersStepColumn, $idConfigStepColumn, " +
