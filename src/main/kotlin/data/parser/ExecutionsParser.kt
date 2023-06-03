@@ -59,5 +59,6 @@ class ExecutionsParser(val parserForSteps: CSVParser,
         const val avgFollowersColumn = "avg_followers"
         const val nInfluencersDeniersColumn = "influencer_count_deniers"
         const val nBotsColumn = "bots_count"
+        const val seedColumn = "randomSeed"
     }
 }

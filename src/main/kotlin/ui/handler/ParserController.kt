@@ -303,7 +303,8 @@ class ParserController : Controller() {
                     sharingMean = record.get(ExecutionsParser.sharingMeanCloumn),
                     numberOfTicks = record.get(ExecutionsParser.numberSteps),
                     sharingDebunking = record.get(ExecutionsParser.sharingDebunking),
-                    ticksToStartLosingInterest = record.get(ExecutionsParser.ticksLostInterest)
+                    ticksToStartLosingInterest = record.get(ExecutionsParser.ticksLostInterest),
+                    seed = record.get(ExecutionsParser.randomSeedColumn)
                 )
             )
             keyMapForConfigIds[record.get(ExecutionsParser.configIdColumn)] = configId
@@ -461,7 +462,8 @@ class ParserController : Controller() {
                     pInfl = record.get(ExecutionsParser.influencersProbColumn),
                     pbelieve = record.get(ExecutionsParser.believeProbColumn),
                     pDeny = record.get(ExecutionsParser.denyProbSocialColumn),
-                    pVacc = record.get(ExecutionsParser.vaccProbColumn)
+                    pVacc = record.get(ExecutionsParser.vaccProbColumn),
+                    seed = record.get(ExecutionsParser.seedColumn)
                 )
             )
             keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)] = configId

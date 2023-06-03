@@ -33,7 +33,8 @@ class ExecutionsDataSource : KoinComponent {
             config.sharingMean,
             config.numberOfTicks,
             config.sharingDebunking,
-            config.ticksToStartLosingInterest
+            config.ticksToStartLosingInterest,
+            config.seed
         )
 
         val getIdQuery = String.format(
@@ -93,7 +94,8 @@ class ExecutionsDataSource : KoinComponent {
             config.pInfl,
             config.pbelieve,
             config.pDeny,
-            config.pVacc
+            config.pVacc,
+            config.seed
         )
 
         val getIdQuery = String.format(
@@ -192,7 +194,8 @@ class ExecutionsDataSource : KoinComponent {
                 csvRecord.get("recovery_mean"),
                 csvRecord.get("recovery_variance"),
                 csvRecord.get("sharing_mean"),
-                csvRecord.get("sharing_variance")
+                csvRecord.get("sharing_variance"),
+                csvRecord.get("randomSeed")
             )
 
             getIdQuery = String.format(
@@ -370,7 +373,8 @@ class ExecutionsDataSource : KoinComponent {
                     sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
                     numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
                     sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
-                    ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn).toString()
+                    ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn).toString(),
+                    seed = queryResult.getString(seedOSNConfigColumn).toString()
                 )
             )
         }
@@ -406,7 +410,8 @@ class ExecutionsDataSource : KoinComponent {
                         numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
                         sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
                         ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
-                            .toString()
+                            .toString(),
+                        seed = queryResult.getString(seedOSNConfigColumn)
                     ).apply {
                         id = queryResult.getInt(idConfigurationColumn)
                     }
@@ -449,7 +454,8 @@ class ExecutionsDataSource : KoinComponent {
                         numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
                         sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
                         ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
-                            .toString()
+                            .toString(),
+                        seed = queryResult.getString(seedOSNConfigColumn)
                     ).apply {
                         id = queryResult.getInt(idConfigurationColumn)
                     }
@@ -492,9 +498,57 @@ class ExecutionsDataSource : KoinComponent {
                         numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
                         sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
                         ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
-                            .toString()
+                            .toString(),
+                        seed = queryResult.getString(seedOSNConfigColumn)
                     ).apply {
                         id = queryResult.getInt(idConfigurationColumn)
+                    }
+                )
+
+            }
+
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+
+        return resultList
+    }
+
+    fun getBestSocialConfigurationForDataSetLabeled (datasetId: Int): List<ConfigurationSocialFakeNews> {
+        val statement = db.createStatement()
+        val query = String.format(getBestConfigSocial, datasetId.toString())
+        val resultList = mutableListOf<ConfigurationSocialFakeNews>()
+        try {
+            val queryResult = statement.executeQuery(query)
+
+            while (queryResult.next()) {
+                resultList.add(
+                    ConfigurationSocialFakeNews(
+                        believersCount = queryResult.getString(believersCountSocialColumn),
+                        deniersCount = queryResult.getString(deniersCountSocialColumn),
+                        susceptibleCount = queryResult.getString(susceptibleCountSocialColumn),
+                        averageFollowers = queryResult.getString(averageFollowersSocialColumn),
+                        selectedTopology = queryResult.getString(selectedTopologySocialColumn),
+                        numberOfTicks = queryResult.getString(numberOfTicksSocialColumn),
+                        totalAgents = queryResult.getString(totalAgentsSocialColumn),
+                        nodesInBarabasi = queryResult.getString(nodesInBarabasiSocialColumn),
+                        initialNodesInBarabasi = queryResult.getString(initialNodesInBarabasiSocialColumn),
+                        nBots = queryResult.getString(nBotsSocialColumn),
+                        createInterest = queryResult.getString(createInterestSocialColumn),
+                        nOfInterests = queryResult.getString(nOfInterestsSocialColumn),
+                        nOfInfluencersBelievers = queryResult.getString(nOfInfluencersBelieversSocialColumn),
+                        nOfInfluencersDeniers = queryResult.getString(nOfInfluencersDeniersSocialColumn),
+                        nOfInfluencersSusceptibles = queryResult.getString(nOfInfluencersSusceptiblesSocialColumn),
+                        nFollowersToBeInfluencer = queryResult.getString(nFollowersToBeInfluencerSocialColumn),
+                        nBotsConnections = queryResult.getString(nBotsConnectionsSocialColumn),
+                        pInfl = queryResult.getString(pInflSocialColumn),
+                        pbelieve = queryResult.getString(pbelieveSocialColumn),
+                        pDeny = queryResult.getString(pDenySocialColumn),
+                        pVacc = queryResult.getString(pVaccSocialColumn),
+                        seed = queryResult.getString(seedSocialColumn)
+                    ).apply {
+                        id = queryResult.getInt(idConfigurationSocialColumn)
                     }
                 )
 
@@ -534,7 +588,8 @@ class ExecutionsDataSource : KoinComponent {
                         numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
                         sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
                         ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
-                            .toString()
+                            .toString(),
+                        seed = queryResult.getString(seedOSNConfigColumn)
                     ).apply {
                         this.id = queryResult.getInt(idConfigurationColumn)
                     }
@@ -883,6 +938,7 @@ class ExecutionsDataSource : KoinComponent {
         private const val numberOfTicksConfigColumn = "numberOfTicks"
         private const val SharingDebunkingConfigColumn = "SharingDebunking"
         private const val TicksToStartLosingInterestConfigColumn = "TicksToStartLosingInterest"
+        private const val seedOSNConfigColumn = "seed"
 
         private const val stepOSNTableName = "Step"
         private const val idStepColumn = "idStep"
@@ -942,6 +998,7 @@ class ExecutionsDataSource : KoinComponent {
         private const val pbelieveSocialColumn = "pbelieve"
         private const val pDenySocialColumn = "pDeny"
         private const val pVaccSocialColumn = "pVacc"
+        private const val seedSocialColumn = "seed"
 
         private const val stepSocialTableName = "StepSocialFakeNews"
         private const val idStepSocialColumn = "idStepSocialFakeNews"
@@ -957,11 +1014,11 @@ class ExecutionsDataSource : KoinComponent {
                 + "$nodesInBarabasiConfigColumn, $numberOfInitialBelieversConfigColumn, "
                 + "$vulnerabilityMeanConfigColumn, $recoveryMeanConfigColumn, "
                 + "$sharingMeanConfigColumn, $numberOfTicksConfigColumn, $SharingDebunkingConfigColumn, "
-                + "$TicksToStartLosingInterestConfigColumn) "
+                + "$TicksToStartLosingInterestConfigColumn, $seedOSNConfigColumn) "
                 + "VALUES "
                 + "(\"%s\", %s, %s, %s, %s, %s, "
                 + "%s, %s, %s, %s, "
-                + "%s, %s, %s, %s, %s, %s)")
+                + "%s, %s, %s, %s, %s, %s, \"%s\")")
 
         private const val insertConfigSocialTemplate = ("INSERT INTO $configurationSocialFakeNewsTableName "
                 + "($believersCountSocialColumn, $deniersCountSocialColumn, $susceptibleCountSocialColumn, "
@@ -974,7 +1031,7 @@ class ExecutionsDataSource : KoinComponent {
                 + "$nOfInfluencersSusceptiblesSocialColumn, "
                 + "$nFollowersToBeInfluencerSocialColumn, $nBotsConnectionsSocialColumn, $pInflSocialColumn, "
                 + "$pbelieveSocialColumn,"
-                + "$pDenySocialColumn, $pVaccSocialColumn) "
+                + "$pDenySocialColumn, $pVaccSocialColumn, $seedSocialColumn) "
                 + "VALUES "
                 + "(%s, %s, %s, %s, "
                 + "\"%s\", %s, "
@@ -983,7 +1040,7 @@ class ExecutionsDataSource : KoinComponent {
                 + "%s, %s, "
                 + "%s, %s, %s, "
                 + "%s, %s, %s, %s, "
-                + "%s, %s)")
+                + "%s, %s, \"%s\")")
 
         private const val getConfigOSNIdTemplate =
             ("SELECT $idConfigurationColumn FROM $configurationOSNTableName WHERE "
@@ -1048,6 +1105,8 @@ class ExecutionsDataSource : KoinComponent {
         private const val getConfigOSN = "SELECT * FROM $configurationOSNTableName WHERE $idConfigurationColumn = %s"
 
         private const val getConfigsSocial = "SELECT * FROM $configurationSocialFakeNewsTableName"
+
+        private const val getBestConfigSocial = "SELECT *, (${errorForLabeledSocialTable}.${nrmseBelieversSocialColumn} + ${errorForLabeledSocialTable}.${nrmseDeniersSocialColumn}) as totalNrmse FROM ${configurationSocialFakeNewsTableName}, ${errorForLabeledSocialTable} WHERE ${dataSetLabeledIdColumn} = %s AND ${configurationIdColumn} = ${idConfigurationSocialColumn} ORDER BY totalNrmse ASC LIMIT 10"
 
         private const val getConfigSocialTemplate = "SELECT * FROM $configurationSocialFakeNewsTableName WHERE $idConfigurationSocialColumn = %s"
 

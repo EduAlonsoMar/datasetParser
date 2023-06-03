@@ -53,6 +53,15 @@ class ExecutionsResultsRepository : KoinComponent {
             }
     }
 
+    fun getBestSocialConfigurationForDataSetLabeled(dataset: String): List<String> {
+        return executionsDataSource
+            .getBestSocialConfigurationForDataSetLabeled(
+                datasetLabeledDataSource.getDataSetId(dataset)
+            ).map {
+                it.id.toString()
+            }
+    }
+
     fun getConfigurations(): List<ConfigurationOSN> {
         return executionsDataSource.getConfigurations()
     }

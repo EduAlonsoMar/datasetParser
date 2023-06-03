@@ -34,15 +34,15 @@ class ResultForComparisonLabeledSocialWindow: View() {
         dataSetLabeled?.let { datasetSelectedId ->
             seriesBelievers = XYChart.Series(
                 "% Believers per day in dataset",
-                resultsChartCreationController.createBelieversSeriesInLabeledDatasetId(
-                    Integer.parseInt(datasetSelectedId)
+                resultsChartCreationController.createBelieversSeriesInLabeledDatasetTitle(
+                    datasetSelectedId
                 )
             )
 
             seriesDeniers = XYChart.Series(
                 "% Deniers per day in dataset",
-                resultsChartCreationController.createDeniersSeriesInLabeledDatasetId(
-                    Integer.parseInt(datasetSelectedId)
+                resultsChartCreationController.createDeniersChartInLabeledDataset(
+                    datasetSelectedId
                 )
             )
         }
@@ -67,7 +67,6 @@ class ResultForComparisonLabeledSocialWindow: View() {
 
         chartLabeled.data.removeAll(seriesBelievers, seriesDeniers, seriesExecutionBelievers, seriesExecutionDeniers)
     }
-
 
     companion object {
         const val DATASET_LABELED_PARAM = "datasetLabeled"

@@ -22,7 +22,8 @@ data class ConfigurationSocialFakeNews(
             val pInfl: String? = null,
             val pbelieve: String? = null,
             val pDeny: String? = null,
-            val pVacc: String? = null
+            val pVacc: String? = null,
+            val seed: String? = null
 ) {
     var id: Int? = null
 }

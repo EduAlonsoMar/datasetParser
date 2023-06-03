@@ -16,7 +16,8 @@ data class ConfigurationOSN(
     val sharingMean: String? = null,
     val numberOfTicks: String? = null,
     val sharingDebunking: String? = null,
-    val ticksToStartLosingInterest: String? = null
+    val ticksToStartLosingInterest: String? = null,
+    val seed: String? = null
 ) {
     var id: Int? = null
 }

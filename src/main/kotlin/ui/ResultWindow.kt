@@ -21,12 +21,16 @@ class ResultWindow : View() {
 
     private val selectedDatasetNotLabeled = SimpleStringProperty()
     private val selectedDatasetLabeled = SimpleStringProperty()
+    private val selectedDatasetLabeledSocial = SimpleStringProperty()
 
     private lateinit var datasetNotLabeledComboBox: ComboBox<String?>
     private lateinit var executionOSNComboBox: ComboBox<String?>
 
     private lateinit var datasetLabeledOSNComboBox: ComboBox<String?>
     private lateinit var executionOSNComboBoxLabeled: ComboBox<String?>
+
+    private lateinit var datasetLabeledSocialComboBox: ComboBox<String?>
+    private lateinit var executionSocialComboBoxLabeled: ComboBox<String?>
 
     override val root = borderpane {
         addClass(AppStyle.resultScreen)
@@ -169,7 +173,10 @@ class ResultWindow : View() {
                             id = "executionOSN"
                         }
 
-                        val datasetNotLabeledCombo = combobox(selectedDatasetNotLabeled, datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()) {
+                        val datasetNotLabeledCombo = combobox(
+                            selectedDatasetNotLabeled,
+                            datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
+                        ) {
                             addClass(AppStyle.comboBoxWithLimit)
                             id = "dataSetNotLabeled"
                         }
@@ -201,7 +208,10 @@ class ResultWindow : View() {
                             id = "executionONSComboboxLabeled"
                         }
 
-                        val datasetLabeled = combobox(selectedDatasetLabeled, datasetLabeledRepository.getDatasetListOnlyNames().toObservable()) {
+                        val datasetLabeled = combobox(
+                            selectedDatasetLabeled,
+                            datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                        ) {
                             addClass(AppStyle.textField)
                             id = "datasetOSNLabeledCombobox"
                         }
@@ -221,6 +231,7 @@ class ResultWindow : View() {
             }
 
             vbox {
+                id = "vBoxInCenter3"
                 addClass(AppStyle.verticalLayoutWithBorder)
                 hbox {
                     addClass(AppStyle.parserLine)
@@ -229,6 +240,7 @@ class ResultWindow : View() {
                     }
                 }
                 vbox {
+                    id = "vBoxWithHorizontal"
                     addClass(AppStyle.parserLine)
                     val executionLabeled = hbox {
                         label("execution id") {
@@ -241,19 +253,25 @@ class ResultWindow : View() {
                     }
 
                     val datasetLabeled = hbox {
-                        val execution = textfield {
+                        id = "hboxWithTheCombos"
+                        val execution = combobox {
                             addClass(AppStyle.textField)
+                            id = "executionComboSocialLabeled"
                         }
 
-                        val datasetLabeled = textfield {
-                            addClass(AppStyle.textField)
+                        val datasetLabeled = combobox(
+                            selectedDatasetLabeledSocial,
+                            datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                        ) {
+                            addClass(AppStyle.comboBoxWithLimit)
+                            id = "datasetLabeledSocial"
                         }
 
                         button("Show Comparison").setOnAction {
                             find<ResultForComparisonLabeledSocialWindow>(
                                 mapOf(
-                                    DATASET_LABELED_PARAM to datasetLabeled.text,
-                                    ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.text
+                                    DATASET_LABELED_PARAM to datasetLabeled.selectedItem,
+                                    ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.selectedItem
                                 )
                             ).openWindow()
                         }
@@ -276,6 +294,7 @@ class ResultWindow : View() {
 
     init {
 
+
         for (i in root.center.getChildList()!!) {
             println("id: ${i.id} and type")
             if (i.id == "vBoxInCenter") {
@@ -293,9 +312,7 @@ class ResultWindow : View() {
                                         datasetNotLabeledComboBox = l as ComboBox<String?>
                                     }
                                 }
-                            }
-
-                            else if (k.id == "hboxForOSNANDLabeled") {
+                            } else if (k.id == "hboxForOSNANDLabeled") {
                                 for (m in k.getChildList()!!) {
                                     println("id: ${m.id}")
                                     if (m.id == "executionONSComboboxLabeled") {
@@ -308,15 +325,46 @@ class ResultWindow : View() {
                         }
                     }
                 }
+            } else if (i.id == "vBoxInCenter3") {
+                for (n in i.getChildList()!!) {
+                    println("id ${n.id}")
+                    if (n.id == "vBoxWithHorizontal") {
+                        for (o in n.getChildList()!!) {
+                            println("id ${n.id}")
+                            if (o.id == "hboxWithTheCombos") {
+                                for (p in o.getChildList()!!) {
+                                    println("id ${p.id}")
+                                    if (p.id == "executionComboSocialLabeled") {
+                                        executionSocialComboBoxLabeled = p as ComboBox<String?>
+                                    } else if (p.id == "datasetLabeledSocial") {
+                                        datasetLabeledSocialComboBox = p as ComboBox<String?>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
         }
 
         selectedDatasetNotLabeled.onChange {
-            executionOSNComboBox.items = executionsResultsRepository.getBestOSNConfigurationsForDataSetNotLabeled(datasetNotLabeledComboBox.selectedItem ?: "default").toObservable()
+            executionOSNComboBox.items = executionsResultsRepository.getBestOSNConfigurationsForDataSetNotLabeled(
+                datasetNotLabeledComboBox.selectedItem ?: "default"
+            ).toObservable()
         }
 
         selectedDatasetLabeled.onChange {
-            executionOSNComboBoxLabeled.items = executionsResultsRepository.getBestOSNConfigurationsForDataSetLabeled(datasetLabeledOSNComboBox.selectedItem ?: "default").toObservable()
+            executionOSNComboBoxLabeled.items = executionsResultsRepository.getBestOSNConfigurationsForDataSetLabeled(
+                datasetLabeledOSNComboBox.selectedItem ?: "default"
+            ).toObservable()
+        }
+
+        selectedDatasetLabeledSocial.onChange {
+            executionSocialComboBoxLabeled.items =
+                executionsResultsRepository.getBestSocialConfigurationForDataSetLabeled(
+                    datasetLabeledSocialComboBox.selectedItem ?: "default"
+                ).toObservable()
         }
     }
 
