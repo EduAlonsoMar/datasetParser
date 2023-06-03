@@ -13,7 +13,7 @@ class MyApp: App(HomeWindow::class, AppStyle::class) {
     override fun start(stage: Stage) {
         with (stage) {
             minWidth = 900.0
-            minHeight = 600.0
+            minHeight = 200.0
             super.start(this)
         }
     }

@@ -33,7 +33,7 @@ class FakeNewsDataBase() {
 
     companion object {
 
-        private const val dataBaseUrl = "jdbc:mysql://localhost:3306/OSNModeling"
+        private const val dataBaseUrl = "jdbc:mysql://192.168.1.179:3306/OSNModeling"
         private const val user = "fakenews"
         private const val pass = "fakenews"
 

@@ -6,6 +6,7 @@ import data.repository.ExecutionsResultsRepository
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.control.ComboBox
+import javafx.scene.layout.BorderPane
 import tornadofx.*
 import ui.css.AppStyle
 import ui.fragment.*
@@ -32,25 +33,81 @@ class ResultWindow : View() {
     private lateinit var datasetLabeledSocialComboBox: ComboBox<String?>
     private lateinit var executionSocialComboBoxLabeled: ComboBox<String?>
 
-    override val root = borderpane {
-        addClass(AppStyle.resultScreen)
-        top = hbox {
-            addClass(AppStyle.titleDiv)
-            label("Datasets and Execution Results") {
-                addClass(AppStyle.titleLabel)
+    override val root = scrollpane {
+        content =
+        borderpane {
+            id = "MainWindow"
+            addClass(AppStyle.resultScreen)
+            top = hbox {
+                addClass(AppStyle.titleDiv)
+                label("Datasets and Execution Results") {
+                    addClass(AppStyle.titleLabel)
+                }
             }
-        }
 
-        center = vbox {
-            addClass(AppStyle.containerWithPadding)
-            hbox {
-                addClass(AppStyle.verticalSeparator)
-            }
-            vbox {
-                addClass(AppStyle.verticalLayoutWithBorder)
+            center = vbox {
+                addClass(AppStyle.containerWithPadding)
+                hbox {
+                    addClass(AppStyle.verticalSeparator)
+                }
+                vbox {
+                    addClass(AppStyle.verticalLayoutWithBorder)
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        label("Datasets Labeled") {
+                            addClass(AppStyle.regularText)
+                        }
+                    }
+
+                    hbox {
+                        addClass(AppStyle.parserLine)
+
+                        val combo = combobox {
+                            id = "datasetLabeledList"
+                            items = datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                        }
+
+                        button("Show Results") {
+                            setOnAction {
+                                find<ResultLabeledWindow>(mapOf("selectedDataset" to combo.selectedItem)).openWindow()
+                            }
+                        }
+
+                    }
+                }
+                hbox {
+                    addClass(AppStyle.verticalSeparator)
+                }
+                vbox {
+                    addClass(AppStyle.verticalLayoutWithBorder)
+
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        label("Datasets not labeled") {
+                            addClass(AppStyle.regularText)
+                        }
+                    }
+                    hbox {
+                        id = "hBoxComparison"
+                        addClass(AppStyle.parserLine)
+
+                        val combo = combobox {
+                            id = "datasetNotLabeledList"
+                            items = datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
+                        }
+
+                        button("Show Results") {
+                            setOnAction {
+                                find<ResultNotLabeledWindow>(mapOf("selectedDataset" to combo.selectedItem)).openWindow()
+                            }
+                        }
+                    }
+                }
+
+
                 hbox {
                     addClass(AppStyle.parserLine)
-                    label("Datasets Labeled") {
+                    label("ResultSets From OSN Realistic model") {
                         addClass(AppStyle.regularText)
                     }
                 }
@@ -59,233 +116,181 @@ class ResultWindow : View() {
                     addClass(AppStyle.parserLine)
 
                     val combo = combobox {
-                        id = "datasetLabeledList"
-                        items = datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                        id = "resultSteps"
+                        items = executionsResultsRepository.getConfigurationIds().toObservable()
                     }
 
                     button("Show Results") {
                         setOnAction {
-                            find<ResultLabeledWindow>(mapOf("selectedDataset" to combo.selectedItem)).openWindow()
+                            find<ResultForExecutionBatchWindow>(mapOf("configSelected" to combo.selectedItem)).openWindow()
                         }
                     }
-
                 }
-            }
-            hbox {
-                addClass(AppStyle.verticalSeparator)
-            }
-            vbox {
-                addClass(AppStyle.verticalLayoutWithBorder)
 
                 hbox {
                     addClass(AppStyle.parserLine)
-                    label("Datasets not labeled") {
+                    label("ResultSets From Social Fake News model") {
                         addClass(AppStyle.regularText)
                     }
                 }
+
                 hbox {
-                    id = "hBoxComparison"
                     addClass(AppStyle.parserLine)
 
                     val combo = combobox {
-                        id = "datasetNotLabeledList"
-                        items = datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
+                        id = "resultSteps"
+                        items = executionsResultsRepository.getConfigurationsSocialIds().toObservable()
                     }
 
                     button("Show Results") {
                         setOnAction {
-                            find<ResultNotLabeledWindow>(mapOf("selectedDataset" to combo.selectedItem)).openWindow()
+                            find<ResultForExecutionsSocialWindow>(mapOf("configSelected" to combo.selectedItem)).openWindow()
                         }
                     }
                 }
-            }
 
-
-            hbox {
-                addClass(AppStyle.parserLine)
-                label("ResultSets From OSN Realistic model") {
-                    addClass(AppStyle.regularText)
-                }
-            }
-
-            hbox {
-                addClass(AppStyle.parserLine)
-
-                val combo = combobox {
-                    id = "resultSteps"
-                    items = executionsResultsRepository.getConfigurationIds().toObservable()
-                }
-
-                button("Show Results") {
-                    setOnAction {
-                        find<ResultForExecutionBatchWindow>(mapOf("configSelected" to combo.selectedItem)).openWindow()
-                    }
-                }
-            }
-
-            hbox {
-                addClass(AppStyle.parserLine)
-                label("ResultSets From Social Fake News model") {
-                    addClass(AppStyle.regularText)
-                }
-            }
-
-            hbox {
-                addClass(AppStyle.parserLine)
-
-                val combo = combobox {
-                    id = "resultSteps"
-                    items = executionsResultsRepository.getConfigurationsSocialIds().toObservable()
-                }
-
-                button("Show Results") {
-                    setOnAction {
-                        find<ResultForExecutionsSocialWindow>(mapOf("configSelected" to combo.selectedItem)).openWindow()
-                    }
-                }
-            }
-
-            vbox {
-                id = "vBoxInCenter"
-                addClass(AppStyle.verticalLayoutWithBorder)
-                hbox {
-                    addClass(AppStyle.parserLine)
-                    label("Comparison between datasets and executions FROM OSN Realistic Model") {
-                        addClass(AppStyle.regularText)
-                    }
-                }
                 vbox {
-                    id = "vBoxInCenter2"
-                    addClass(AppStyle.parserLine)
-                    val execution = hbox {
-                        label("execution id") {
-                            addClass(AppStyle.textField)
-                        }
-
-                        label("Dataset not labeled id") {
-                            addClass(AppStyle.textField)
+                    id = "vBoxInCenter"
+                    addClass(AppStyle.verticalLayoutWithBorder)
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        label("Comparison between datasets and executions FROM OSN Realistic Model") {
+                            addClass(AppStyle.regularText)
                         }
                     }
-                    val dataseNotLabeled = hbox {
-                        id = "hboxWithComparisonOSNNotLabeled"
-                        var executionCombo = combobox {
-                            addClass(AppStyle.textField)
-                            id = "executionOSN"
+                    vbox {
+                        id = "vBoxInCenter2"
+                        addClass(AppStyle.parserLine)
+                        val execution = hbox {
+                            label("execution id") {
+                                addClass(AppStyle.textField)
+                            }
+
+                            label("Dataset not labeled id") {
+                                addClass(AppStyle.textField)
+                            }
+                        }
+                        val dataseNotLabeled = hbox {
+                            id = "hboxWithComparisonOSNNotLabeled"
+                            var executionCombo = combobox {
+                                addClass(AppStyle.textField)
+                                id = "executionOSN"
+                            }
+
+                            val datasetNotLabeledCombo = combobox(
+                                selectedDatasetNotLabeled,
+                                datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
+                            ) {
+                                addClass(AppStyle.comboBoxWithLimit)
+                                id = "dataSetNotLabeled"
+                            }
+
+                            button("Show Comparison").setOnAction {
+                                find<ResultForComparisonWindow>(
+                                    mapOf(
+                                        DATASET_NOT_LABELED_PARAM to datasetNotLabeledCombo.selectedItem,
+                                        EXECUTION_PARAM to executionCombo.selectedItem
+                                    )
+                                ).openWindow()
+                            }
+
+                        }
+                        val executionLabeled = hbox {
+                            label("execution id") {
+                                addClass(AppStyle.textField)
+                            }
+                            label("Dataset labeled id") {
+                                addClass(AppStyle.textField)
+                            }
+
                         }
 
-                        val datasetNotLabeledCombo = combobox(
-                            selectedDatasetNotLabeled,
-                            datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
-                        ) {
-                            addClass(AppStyle.comboBoxWithLimit)
-                            id = "dataSetNotLabeled"
+                        val datasetLabeled = hbox {
+                            id = "hboxForOSNANDLabeled"
+                            val execution = combobox {
+                                addClass(AppStyle.textField)
+                                id = "executionONSComboboxLabeled"
+                            }
+
+                            val datasetLabeled = combobox(
+                                selectedDatasetLabeled,
+                                datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                            ) {
+                                addClass(AppStyle.textField)
+                                id = "datasetOSNLabeledCombobox"
+                            }
+
+                            button("Show Comparison").setOnAction {
+                                find<ResultForComparisonLabeledWindow>(
+                                    mapOf(
+                                        DATASET_LABELED_PARAM to datasetLabeled.selectedItem,
+                                        ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.selectedItem
+                                    )
+                                ).openWindow()
+                            }
                         }
 
-                        button("Show Comparison").setOnAction {
-                            find<ResultForComparisonWindow>(
-                                mapOf(
-                                    DATASET_NOT_LABELED_PARAM to datasetNotLabeledCombo.selectedItem,
-                                    EXECUTION_PARAM to executionCombo.selectedItem
-                                )
-                            ).openWindow()
-                        }
 
                     }
-                    val executionLabeled = hbox {
-                        label("execution id") {
-                            addClass(AppStyle.textField)
-                        }
-                        label("Dataset labeled id") {
-                            addClass(AppStyle.textField)
-                        }
-
-                    }
-
-                    val datasetLabeled = hbox {
-                        id = "hboxForOSNANDLabeled"
-                        val execution = combobox {
-                            addClass(AppStyle.textField)
-                            id = "executionONSComboboxLabeled"
-                        }
-
-                        val datasetLabeled = combobox(
-                            selectedDatasetLabeled,
-                            datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
-                        ) {
-                            addClass(AppStyle.textField)
-                            id = "datasetOSNLabeledCombobox"
-                        }
-
-                        button("Show Comparison").setOnAction {
-                            find<ResultForComparisonLabeledWindow>(
-                                mapOf(
-                                    DATASET_LABELED_PARAM to datasetLabeled.selectedItem,
-                                    ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.selectedItem
-                                )
-                            ).openWindow()
-                        }
-                    }
-
-
                 }
-            }
 
-            vbox {
-                id = "vBoxInCenter3"
-                addClass(AppStyle.verticalLayoutWithBorder)
-                hbox {
-                    addClass(AppStyle.parserLine)
-                    label("Comparison between datasets and executions From Social Fake News model") {
-                        addClass(AppStyle.regularText)
-                    }
-                }
                 vbox {
-                    id = "vBoxWithHorizontal"
-                    addClass(AppStyle.parserLine)
-                    val executionLabeled = hbox {
-                        label("execution id") {
-                            addClass(AppStyle.textField)
-                        }
-                        label("Dataset labeled id") {
-                            addClass(AppStyle.textField)
-                        }
-
-                    }
-
-                    val datasetLabeled = hbox {
-                        id = "hboxWithTheCombos"
-                        val execution = combobox {
-                            addClass(AppStyle.textField)
-                            id = "executionComboSocialLabeled"
-                        }
-
-                        val datasetLabeled = combobox(
-                            selectedDatasetLabeledSocial,
-                            datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
-                        ) {
-                            addClass(AppStyle.comboBoxWithLimit)
-                            id = "datasetLabeledSocial"
-                        }
-
-                        button("Show Comparison").setOnAction {
-                            find<ResultForComparisonLabeledSocialWindow>(
-                                mapOf(
-                                    DATASET_LABELED_PARAM to datasetLabeled.selectedItem,
-                                    ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.selectedItem
-                                )
-                            ).openWindow()
+                    id = "vBoxInCenter3"
+                    addClass(AppStyle.verticalLayoutWithBorder)
+                    hbox {
+                        addClass(AppStyle.parserLine)
+                        label("Comparison between datasets and executions From Social Fake News model") {
+                            addClass(AppStyle.regularText)
                         }
                     }
+                    vbox {
+                        id = "vBoxWithHorizontal"
+                        addClass(AppStyle.parserLine)
+                        val executionLabeled = hbox {
+                            label("execution id") {
+                                addClass(AppStyle.textField)
+                            }
+                            label("Dataset labeled id") {
+                                addClass(AppStyle.textField)
+                            }
+
+                        }
+
+                        val datasetLabeled = hbox {
+                            id = "hboxWithTheCombos"
+                            val execution = combobox {
+                                addClass(AppStyle.textField)
+                                id = "executionComboSocialLabeled"
+                            }
+
+                            val datasetLabeled = combobox(
+                                selectedDatasetLabeledSocial,
+                                datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                            ) {
+                                addClass(AppStyle.comboBoxWithLimit)
+                                id = "datasetLabeledSocial"
+                            }
+
+                            button("Show Comparison").setOnAction {
+                                find<ResultForComparisonLabeledSocialWindow>(
+                                    mapOf(
+                                        DATASET_LABELED_PARAM to datasetLabeled.selectedItem,
+                                        ResultForComparisonLabeledWindow.EXECUTION_PARAM to execution.selectedItem
+                                    )
+                                ).openWindow()
+                            }
+                        }
 
 
+                    }
                 }
-            }
 
-            hbox {
-                alignment = Pos.CENTER_RIGHT
-                button("Back") {
-                    setOnAction {
-                        onBackToHomeclicked()
+                hbox {
+                    alignment = Pos.CENTER_RIGHT
+                    button("Back") {
+                        setOnAction {
+                            onBackToHomeclicked()
+                        }
                     }
                 }
             }
@@ -294,8 +299,9 @@ class ResultWindow : View() {
 
     init {
 
+        val borderPane = (root.content as BorderPane)
 
-        for (i in root.center.getChildList()!!) {
+        for (i in (borderPane.center.getChildList()!!)) {
             println("id: ${i.id} and type")
             if (i.id == "vBoxInCenter") {
                 for (j in i.getChildList()!!) {
