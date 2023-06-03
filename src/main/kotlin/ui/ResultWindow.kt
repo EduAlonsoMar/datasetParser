@@ -13,12 +13,15 @@ import ui.fragment.*
 import ui.fragment.ResultForComparisonLabeledWindow.Companion.DATASET_LABELED_PARAM
 import ui.fragment.ResultForComparisonWindow.Companion.DATASET_NOT_LABELED_PARAM
 import ui.fragment.ResultForComparisonWindow.Companion.EXECUTION_PARAM
+import ui.handler.ResultsController
 
 class ResultWindow : View() {
 
-    private val datasetLabeledRepository = DatasetLabeledRepository()
-    private val datasetNotLabeledRepository = DatasetNotLabeledRepository()
-    private val executionsResultsRepository = ExecutionsResultsRepository()
+    //private val datasetLabeledRepository = DatasetLabeledRepository()
+    //private val datasetNotLabeledRepository = DatasetNotLabeledRepository()
+    //private val executionsResultsRepository = ExecutionsResultsRepository()
+
+    private val resultsController: ResultsController by inject()
 
     private val selectedDatasetNotLabeled = SimpleStringProperty()
     private val selectedDatasetLabeled = SimpleStringProperty()
@@ -64,7 +67,7 @@ class ResultWindow : View() {
 
                         val combo = combobox {
                             id = "datasetLabeledList"
-                            items = datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                            items = resultsController.getDatasetListOnlyNames().toObservable()
                         }
 
                         button("Show Results") {
@@ -93,7 +96,7 @@ class ResultWindow : View() {
 
                         val combo = combobox {
                             id = "datasetNotLabeledList"
-                            items = datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
+                            items = resultsController.getTitleForDataSetsWithMostUsers().toObservable()
                         }
 
                         button("Show Results") {
@@ -117,7 +120,7 @@ class ResultWindow : View() {
 
                     val combo = combobox {
                         id = "resultSteps"
-                        items = executionsResultsRepository.getConfigurationIds().toObservable()
+                        items = resultsController.getConfigurationIds().toObservable()
                     }
 
                     button("Show Results") {
@@ -139,7 +142,7 @@ class ResultWindow : View() {
 
                     val combo = combobox {
                         id = "resultSteps"
-                        items = executionsResultsRepository.getConfigurationsSocialIds().toObservable()
+                        items = resultsController.getConfigurationsSocialIds().toObservable()
                     }
 
                     button("Show Results") {
@@ -179,7 +182,7 @@ class ResultWindow : View() {
 
                             val datasetNotLabeledCombo = combobox(
                                 selectedDatasetNotLabeled,
-                                datasetNotLabeledRepository.getTitleForDataSetsWithMostUsers().toObservable()
+                                resultsController.getTitleForDataSetsWithMostUsers().toObservable()
                             ) {
                                 addClass(AppStyle.comboBoxWithLimit)
                                 id = "dataSetNotLabeled"
@@ -214,7 +217,7 @@ class ResultWindow : View() {
 
                             val datasetLabeled = combobox(
                                 selectedDatasetLabeled,
-                                datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                                resultsController.getDatasetListOnlyNames().toObservable()
                             ) {
                                 addClass(AppStyle.textField)
                                 id = "datasetOSNLabeledCombobox"
@@ -265,7 +268,7 @@ class ResultWindow : View() {
 
                             val datasetLabeled = combobox(
                                 selectedDatasetLabeledSocial,
-                                datasetLabeledRepository.getDatasetListOnlyNames().toObservable()
+                                resultsController.getDatasetListOnlyNames().toObservable()
                             ) {
                                 addClass(AppStyle.comboBoxWithLimit)
                                 id = "datasetLabeledSocial"
@@ -355,20 +358,20 @@ class ResultWindow : View() {
         }
 
         selectedDatasetNotLabeled.onChange {
-            executionOSNComboBox.items = executionsResultsRepository.getBestOSNConfigurationsForDataSetNotLabeled(
+            executionOSNComboBox.items = resultsController.getBestOSNConfigurationsForDataSetNotLabeled(
                 datasetNotLabeledComboBox.selectedItem ?: "default"
             ).toObservable()
         }
 
         selectedDatasetLabeled.onChange {
-            executionOSNComboBoxLabeled.items = executionsResultsRepository.getBestOSNConfigurationsForDataSetLabeled(
+            executionOSNComboBoxLabeled.items = resultsController.getBestOSNConfigurationsForDataSetLabeled(
                 datasetLabeledOSNComboBox.selectedItem ?: "default"
             ).toObservable()
         }
 
         selectedDatasetLabeledSocial.onChange {
             executionSocialComboBoxLabeled.items =
-                executionsResultsRepository.getBestSocialConfigurationForDataSetLabeled(
+                resultsController.getBestSocialConfigurationForDataSetLabeled(
                     datasetLabeledSocialComboBox.selectedItem ?: "default"
                 ).toObservable()
         }
