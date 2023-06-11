@@ -54,7 +54,8 @@ class ExecutionsDataSource : KoinComponent {
             config.sharingMean,
             config.numberOfTicks,
             config.sharingDebunking,
-            config.ticksToStartLosingInterest
+            config.ticksToStartLosingInterest,
+            config.seed
         )
         try {
             statement.execute(insertQuery)
@@ -63,7 +64,7 @@ class ExecutionsDataSource : KoinComponent {
                 return result.getInt(idConfigurationColumn)
             }
         } catch (e: SQLException) {
-            db.logQueryError(insertQuery, e)
+            db.logQueryError(getIdQuery, e)
         }
 
         return -1
@@ -338,7 +339,9 @@ class ExecutionsDataSource : KoinComponent {
             error.configurationId,
             error.datasetNotLabeledId,
             error.rmse,
-            error.nrmse
+            error.nrmse,
+            error.rmseDays,
+            error.nrmseDays
         )
 
         try {
@@ -471,6 +474,50 @@ class ExecutionsDataSource : KoinComponent {
         return resultList
     }
 
+    fun getBestOSNConfigurationsForDataSetNotLabeledDays(datasetId: Int): List<ConfigurationOSN> {
+        val statement = db.createStatement()
+
+        val resultList = mutableListOf<ConfigurationOSN>()
+        val query = String.format(getBest10ConfigsDays, datasetId.toString())
+        try {
+            val queryResult = statement.executeQuery(query)
+
+            while (queryResult.next()) {
+                resultList.add(
+                    ConfigurationOSN(
+                        topology = queryResult.getString(topologyConfigColumn),
+                        agents = queryResult.getInt(agentsConfigColumn).toString(),
+                        influencers = queryResult.getInt(influencersConfigColumn).toString(),
+                        bots = queryResult.getInt(botsConfigColumn).toString(),
+                        workWithTimeDynamics = queryResult.getBoolean(workWithTimeDynamicsConfigColumn).toString(),
+                        timeAccessForCommonUsers = queryResult.getInt(timeAccessForCommonUsersConfigColumn).toString(),
+                        timeAccessForBots = queryResult.getInt(timeAccessForBotsConfigColumn).toString(),
+                        initialNodesBarabasi = queryResult.getInt(initialNodesInBarabasiConfigColumn).toString(),
+                        nodesInBarabasi = queryResult.getInt(nodesInBarabasiConfigColumn).toString(),
+                        numberOfInitialBelievers = queryResult.getInt(numberOfInitialBelieversConfigColumn).toString(),
+                        vulnerabilityMean = queryResult.getDouble(vulnerabilityMeanConfigColumn).toString(),
+                        recoveryMean = queryResult.getDouble(recoveryMeanConfigColumn).toString(),
+                        sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
+                        numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
+                        sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
+                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
+                            .toString(),
+                        seed = queryResult.getString(seedOSNConfigColumn)
+                    ).apply {
+                        id = queryResult.getInt(idConfigurationColumn)
+                    }
+                )
+
+            }
+
+        } catch (e: SQLException) {
+            db.logQueryError(getConfigIds, e)
+        }
+
+
+        return resultList
+    }
+
     fun getBestOSNConfigurationsForDataSetLabeled(datasetLabeledId: Int): List<ConfigurationOSN> {
         val statement = db.createStatement()
 
@@ -515,7 +562,7 @@ class ExecutionsDataSource : KoinComponent {
         return resultList
     }
 
-    fun getBestSocialConfigurationForDataSetLabeled (datasetId: Int): List<ConfigurationSocialFakeNews> {
+    fun getBestSocialConfigurationForDataSetLabeled(datasetId: Int): List<ConfigurationSocialFakeNews> {
         val statement = db.createStatement()
         val query = String.format(getBestConfigSocial, datasetId.toString())
         val resultList = mutableListOf<ConfigurationSocialFakeNews>()
@@ -569,30 +616,30 @@ class ExecutionsDataSource : KoinComponent {
 
             val queryResult = statement.executeQuery(query)
 
-            while (queryResult.next()) {
+            if (queryResult.next()) {
 
-                    ConfigurationOSN(
-                        topology = queryResult.getString(topologyConfigColumn),
-                        agents = queryResult.getInt(agentsConfigColumn).toString(),
-                        influencers = queryResult.getInt(influencersConfigColumn).toString(),
-                        bots = queryResult.getInt(botsConfigColumn).toString(),
-                        workWithTimeDynamics = queryResult.getBoolean(workWithTimeDynamicsConfigColumn).toString(),
-                        timeAccessForCommonUsers = queryResult.getInt(timeAccessForCommonUsersConfigColumn).toString(),
-                        timeAccessForBots = queryResult.getInt(timeAccessForBotsConfigColumn).toString(),
-                        initialNodesBarabasi = queryResult.getInt(initialNodesInBarabasiConfigColumn).toString(),
-                        nodesInBarabasi = queryResult.getInt(nodesInBarabasiConfigColumn).toString(),
-                        numberOfInitialBelievers = queryResult.getInt(numberOfInitialBelieversConfigColumn).toString(),
-                        vulnerabilityMean = queryResult.getDouble(vulnerabilityMeanConfigColumn).toString(),
-                        recoveryMean = queryResult.getDouble(recoveryMeanConfigColumn).toString(),
-                        sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
-                        numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
-                        sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
-                        ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
-                            .toString(),
-                        seed = queryResult.getString(seedOSNConfigColumn)
-                    ).apply {
-                        this.id = queryResult.getInt(idConfigurationColumn)
-                    }
+                return ConfigurationOSN(
+                    topology = queryResult.getString(topologyConfigColumn),
+                    agents = queryResult.getInt(agentsConfigColumn).toString(),
+                    influencers = queryResult.getInt(influencersConfigColumn).toString(),
+                    bots = queryResult.getInt(botsConfigColumn).toString(),
+                    workWithTimeDynamics = queryResult.getBoolean(workWithTimeDynamicsConfigColumn).toString(),
+                    timeAccessForCommonUsers = queryResult.getInt(timeAccessForCommonUsersConfigColumn).toString(),
+                    timeAccessForBots = queryResult.getInt(timeAccessForBotsConfigColumn).toString(),
+                    initialNodesBarabasi = queryResult.getInt(initialNodesInBarabasiConfigColumn).toString(),
+                    nodesInBarabasi = queryResult.getInt(nodesInBarabasiConfigColumn).toString(),
+                    numberOfInitialBelievers = queryResult.getInt(numberOfInitialBelieversConfigColumn).toString(),
+                    vulnerabilityMean = queryResult.getDouble(vulnerabilityMeanConfigColumn).toString(),
+                    recoveryMean = queryResult.getDouble(recoveryMeanConfigColumn).toString(),
+                    sharingMean = queryResult.getDouble(sharingMeanConfigColumn).toString(),
+                    numberOfTicks = queryResult.getInt(numberOfTicksConfigColumn).toString(),
+                    sharingDebunking = queryResult.getDouble(SharingDebunkingConfigColumn).toString(),
+                    ticksToStartLosingInterest = queryResult.getInt(TicksToStartLosingInterestConfigColumn)
+                        .toString(),
+                    seed = queryResult.getString(seedOSNConfigColumn)
+                ).apply {
+                    this.id = queryResult.getInt(idConfigurationColumn)
+                }
 
 
             }
@@ -607,6 +654,38 @@ class ExecutionsDataSource : KoinComponent {
         }
     }
 
+    fun getNrmseTotalOSN(datasetLabeledId: Int, executionId: Int): Double {
+        val statement = db.createStatement()
+        val query = String.format(getNrmseTotalOSN, executionId.toString(), datasetLabeledId.toString())
+        try {
+            val queryResult = statement.executeQuery(query)
+            if (queryResult.next()) {
+                return queryResult.getDouble(nrmseBelieversColumn) + queryResult.getDouble(nrmseDeniersColumn)
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+        return 10.0
+    }
+
+    fun getNrmseTotalSocial(datasetLabeledId: Int, executionId: Int): Double {
+        val statement = db.createStatement()
+        val query = String.format(getNrmseTotalSocial, executionId.toString(), datasetLabeledId.toString())
+        try {
+            val queryResult = statement.executeQuery(query)
+            if (queryResult.next()) {
+                return queryResult.getDouble(nrmseBelieversSocialColumn) + queryResult.getDouble(
+                    nrmseDeniersSocialColumn
+                )
+            }
+        } catch (e: SQLException) {
+            db.logQueryError(query, e)
+        }
+
+        return 10.0
+    }
+
     fun getConfigurationsSocial(): List<ConfigurationSocialFakeNews> {
 
         val statement = db.createStatement()
@@ -618,27 +697,27 @@ class ExecutionsDataSource : KoinComponent {
             while (queryResult.next()) {
                 resultList.add(
                     ConfigurationSocialFakeNews(
-                            believersCount = queryResult.getString(believersCountSocialColumn),
-                            deniersCount = queryResult.getString(deniersCountSocialColumn),
-                            susceptibleCount = queryResult.getString(susceptibleCountSocialColumn),
-                            averageFollowers = queryResult.getString(averageFollowersSocialColumn),
-                            selectedTopology = queryResult.getString(selectedTopologySocialColumn),
-                            numberOfTicks = queryResult.getString(numberOfTicksSocialColumn),
-                            totalAgents = queryResult.getString(totalAgentsSocialColumn),
-                            nodesInBarabasi = queryResult.getString(nodesInBarabasiSocialColumn),
-                            initialNodesInBarabasi = queryResult.getString(initialNodesInBarabasiSocialColumn),
-                            nBots = queryResult.getString(nBotsSocialColumn),
-                            createInterest = queryResult.getString(createInterestSocialColumn),
-                            nOfInterests = queryResult.getString(nOfInterestsSocialColumn),
-                            nOfInfluencersBelievers = queryResult.getString(nOfInfluencersBelieversSocialColumn),
-                            nOfInfluencersDeniers = queryResult.getString(nOfInfluencersDeniersSocialColumn),
-                            nOfInfluencersSusceptibles = queryResult.getString(nOfInfluencersSusceptiblesSocialColumn),
-                            nFollowersToBeInfluencer = queryResult.getString(nFollowersToBeInfluencerSocialColumn),
-                            nBotsConnections = queryResult.getString(nBotsConnectionsSocialColumn),
-                            pInfl = queryResult.getString(pInflSocialColumn),
-                            pbelieve = queryResult.getString(pbelieveSocialColumn),
-                            pDeny = queryResult.getString(pDenySocialColumn),
-                            pVacc = queryResult.getString(pVaccSocialColumn)
+                        believersCount = queryResult.getString(believersCountSocialColumn),
+                        deniersCount = queryResult.getString(deniersCountSocialColumn),
+                        susceptibleCount = queryResult.getString(susceptibleCountSocialColumn),
+                        averageFollowers = queryResult.getString(averageFollowersSocialColumn),
+                        selectedTopology = queryResult.getString(selectedTopologySocialColumn),
+                        numberOfTicks = queryResult.getString(numberOfTicksSocialColumn),
+                        totalAgents = queryResult.getString(totalAgentsSocialColumn),
+                        nodesInBarabasi = queryResult.getString(nodesInBarabasiSocialColumn),
+                        initialNodesInBarabasi = queryResult.getString(initialNodesInBarabasiSocialColumn),
+                        nBots = queryResult.getString(nBotsSocialColumn),
+                        createInterest = queryResult.getString(createInterestSocialColumn),
+                        nOfInterests = queryResult.getString(nOfInterestsSocialColumn),
+                        nOfInfluencersBelievers = queryResult.getString(nOfInfluencersBelieversSocialColumn),
+                        nOfInfluencersDeniers = queryResult.getString(nOfInfluencersDeniersSocialColumn),
+                        nOfInfluencersSusceptibles = queryResult.getString(nOfInfluencersSusceptiblesSocialColumn),
+                        nFollowersToBeInfluencer = queryResult.getString(nFollowersToBeInfluencerSocialColumn),
+                        nBotsConnections = queryResult.getString(nBotsConnectionsSocialColumn),
+                        pInfl = queryResult.getString(pInflSocialColumn),
+                        pbelieve = queryResult.getString(pbelieveSocialColumn),
+                        pDeny = queryResult.getString(pDenySocialColumn),
+                        pVacc = queryResult.getString(pVaccSocialColumn)
                     ).apply {
                         id = queryResult.getInt(idConfigurationSocialColumn)
                     }
@@ -866,7 +945,7 @@ class ExecutionsDataSource : KoinComponent {
         return result
     }
 
-    fun getMaxNumberOfDeniersInStepNormalizedSocial (configId: String, tick: Int, stepsToNormalize: Int): Int {
+    fun getMaxNumberOfDeniersInStepNormalizedSocial(configId: String, tick: Int, stepsToNormalize: Int): Int {
         var getQuery: String
         var result = 0
         var tmpToCheckResult: Int
@@ -974,6 +1053,8 @@ class ExecutionsDataSource : KoinComponent {
         private const val datasetNotLabeledIdErrorForNotLabeledColumn = "DataSetNotLabeledId"
         private const val rmseErrorNotLabeledColumn = "rmse"
         private const val nrmseErrorNotLabeledColumn = "nrmse"
+        private const val rmseErrorNotLAbeledDaysColumn = "rmseDays"
+        private const val nrmseErrorNotLabeledDaysColumn = "nrmseDays"
 
         private const val configurationSocialFakeNewsTableName = "ConfigurationSocialFakeNews"
         private const val idConfigurationSocialColumn = "idConfigurationSocialFakeNews"
@@ -1020,6 +1101,26 @@ class ExecutionsDataSource : KoinComponent {
                 + "%s, %s, %s, %s, "
                 + "%s, %s, %s, %s, %s, %s, \"%s\")")
 
+        private const val getConfigOSNIdTemplate =
+            ("SELECT $idConfigurationColumn FROM $configurationOSNTableName WHERE "
+                    + "$topologyConfigColumn = \"%s\" AND "
+                    + "$agentsConfigColumn = %s AND "
+                    + "$influencersConfigColumn = %s AND "
+                    + "$botsConfigColumn = %s AND "
+                    + "$workWithTimeDynamicsConfigColumn = %s AND "
+                    + "$timeAccessForCommonUsersConfigColumn = %s AND "
+                    + "$timeAccessForBotsConfigColumn = %s AND "
+                    + "$initialNodesInBarabasiConfigColumn = %s AND "
+                    + "$nodesInBarabasiConfigColumn = %s AND "
+                    + "$numberOfInitialBelieversConfigColumn = %s AND "
+                    + "$vulnerabilityMeanConfigColumn = %s AND "
+                    + "$recoveryMeanConfigColumn = %s AND "
+                    + "$sharingMeanConfigColumn = %s AND "
+                    + "$numberOfTicksConfigColumn = %s AND "
+                    + "$SharingDebunkingConfigColumn = %s AND "
+                    + "$TicksToStartLosingInterestConfigColumn = %s AND "
+                    + "$seedOSNConfigColumn = \"%s\"")
+
         private const val insertConfigSocialTemplate = ("INSERT INTO $configurationSocialFakeNewsTableName "
                 + "($believersCountSocialColumn, $deniersCountSocialColumn, $susceptibleCountSocialColumn, "
                 + "$averageFollowersSocialColumn, "
@@ -1041,30 +1142,6 @@ class ExecutionsDataSource : KoinComponent {
                 + "%s, %s, %s, "
                 + "%s, %s, %s, %s, "
                 + "%s, %s, \"%s\")")
-
-        private const val getConfigOSNIdTemplate =
-            ("SELECT $idConfigurationColumn FROM $configurationOSNTableName WHERE "
-                    + "$believersCountSocialColumn = %s AND "
-                    + "$deniersCountSocialColumn = %s AND "
-                    + "$susceptibleCountSocialColumn = %s AND "
-                    + "$averageFollowersSocialColumn = %s AND "
-                    + "$selectedTopologySocialColumn = \"%s\" AND "
-                    + "$numberOfTicksSocialColumn = %s AND "
-                    + "$totalAgentsSocialColumn = %s AND "
-                    + "$nodesInBarabasiSocialColumn = %s AND "
-                    + "$initialNodesInBarabasiSocialColumn = %s AND "
-                    + "$nBotsSocialColumn = %s AND "
-                    + "$createInterestSocialColumn = %s AND "
-                    + "$nOfInterestsSocialColumn = %s AND "
-                    + "$nOfInfluencersBelieversSocialColumn = %s AND "
-                    + "$nOfInfluencersDeniersSocialColumn = %s AND "
-                    + "$nOfInfluencersSusceptiblesSocialColumn = %s AND "
-                    + "$nFollowersToBeInfluencerSocialColumn = %s AND "
-                    + "$nBotsConnectionsSocialColumn = %s AND "
-                    + "$pInflSocialColumn = %s AND "
-                    + "$pbelieveSocialColumn = %s AND "
-                    + "$pDenySocialColumn = %s AND "
-                    + "$pVaccSocialColumn = %s")
 
         private const val getConfigSocialIdTemplate =
             ("SELECT $idConfigurationSocialColumn FROM $configurationSocialFakeNewsTableName WHERE "
@@ -1098,17 +1175,30 @@ class ExecutionsDataSource : KoinComponent {
 
         private const val getConfigs = "SELECT * FROM $configurationOSNTableName"
 
-        private const val getBest10Configs = "SELECT * FROM $configurationOSNTableName, ${errorForNotLabeledOSNTable} WHERE ${datasetNotLabeledIdErrorForNotLabeledColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY ${nrmseErrorNotLabeledColumn} ASC LIMIT 10"
+        private const val getBest10Configs =
+            "SELECT * FROM $configurationOSNTableName, ${errorForNotLabeledOSNTable} WHERE ${datasetNotLabeledIdErrorForNotLabeledColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY ${nrmseErrorNotLabeledColumn} ASC LIMIT 10"
 
-        private const val getBest10ConfigsForOSNLabeled = "SELECT *, (${errorForLabeledOSNTable}.${nrmseBelieversColumn} + ${errorForLabeledOSNTable}.${nrmseDeniersColumn}) as totalNRMSE FROM ${configurationOSNTableName}, ${errorForLabeledOSNTable} WHERE ${dataSetLabeledIdColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY totalNRMSE ASC LIMIT 10"
+        private const val getBest10ConfigsDays =
+            "SELECT * FROM $configurationOSNTableName, ${errorForNotLabeledOSNTable} WHERE ${datasetNotLabeledIdErrorForNotLabeledColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY ${nrmseErrorNotLabeledDaysColumn} ASC LIMIT 10"
+
+        private const val getBest10ConfigsForOSNLabeled =
+            "SELECT *, (${errorForLabeledOSNTable}.${nrmseBelieversColumn} + ${errorForLabeledOSNTable}.${nrmseDeniersColumn}) as totalNRMSE FROM ${configurationOSNTableName}, ${errorForLabeledOSNTable} WHERE ${dataSetLabeledIdColumn} = %s AND ${idConfigurationColumn} = ${configurationIdColumn} ORDER BY totalNRMSE ASC LIMIT 10"
 
         private const val getConfigOSN = "SELECT * FROM $configurationOSNTableName WHERE $idConfigurationColumn = %s"
 
         private const val getConfigsSocial = "SELECT * FROM $configurationSocialFakeNewsTableName"
 
-        private const val getBestConfigSocial = "SELECT *, (${errorForLabeledSocialTable}.${nrmseBelieversSocialColumn} + ${errorForLabeledSocialTable}.${nrmseDeniersSocialColumn}) as totalNrmse FROM ${configurationSocialFakeNewsTableName}, ${errorForLabeledSocialTable} WHERE ${dataSetLabeledIdColumn} = %s AND ${configurationIdColumn} = ${idConfigurationSocialColumn} ORDER BY totalNrmse ASC LIMIT 10"
+        private const val getNrmseTotalOSN =
+            "SELECT $nrmseDeniersColumn, $nrmseBelieversColumn FROM $errorForLabeledOSNTable WHERE $configurationIdColumn = %s AND $dataSetLabeledIdColumn = %s"
 
-        private const val getConfigSocialTemplate = "SELECT * FROM $configurationSocialFakeNewsTableName WHERE $idConfigurationSocialColumn = %s"
+        private const val getNrmseTotalSocial =
+            "SELECT $nrmseDeniersSocialColumn, $nrmseBelieversSocialColumn FROM $errorForLabeledSocialTable WHERE $ConfigurationIdSocialColumn = %s AND $DataSetLabeledIdSocialColumn = %s"
+
+        private const val getBestConfigSocial =
+            "SELECT *, (${errorForLabeledSocialTable}.${nrmseBelieversSocialColumn} + ${errorForLabeledSocialTable}.${nrmseDeniersSocialColumn}) as totalNrmse FROM ${configurationSocialFakeNewsTableName}, ${errorForLabeledSocialTable} WHERE ${dataSetLabeledIdColumn} = %s AND ${configurationIdColumn} = ${idConfigurationSocialColumn} ORDER BY totalNrmse ASC LIMIT 10"
+
+        private const val getConfigSocialTemplate =
+            "SELECT * FROM $configurationSocialFakeNewsTableName WHERE $idConfigurationSocialColumn = %s"
 
         private const val insertResultStepOSNTemplate = ("INSERT INTO $stepOSNTableName " +
                 "($tickStepColumn, $believersStepColumn, $factCheckersStepColumn, $idConfigStepColumn, " +
@@ -1162,8 +1252,9 @@ class ExecutionsDataSource : KoinComponent {
 
         private const val insertErrorForNotLabeled = "INSERT INTO $errorForNotLabeledOSNTable " +
                 "($configurationIdErrorForNotLabeledColumn, $datasetNotLabeledIdErrorForNotLabeledColumn, " +
-                "$rmseErrorNotLabeledColumn, $nrmseErrorNotLabeledColumn) VALUES " +
-                "(%d, %d, %,.4f, %.4f)"
+                "$rmseErrorNotLabeledColumn, $nrmseErrorNotLabeledColumn, " +
+                "$rmseErrorNotLAbeledDaysColumn, $nrmseErrorNotLabeledDaysColumn) VALUES " +
+                "(%d, %d, %,.4f, %.4f, %.4f, %.4f)"
 
         private const val getNumberOfTicksSocial = "SELECT $numberOfTicksSocialColumn " +
                 "FROM $configurationSocialFakeNewsTableName WHERE $idConfigurationSocialColumn = %s"

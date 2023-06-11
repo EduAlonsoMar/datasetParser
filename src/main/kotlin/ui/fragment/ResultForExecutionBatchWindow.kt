@@ -103,7 +103,9 @@ class ResultForExecutionBatchWindow : View() {
             configurationId = config.id!!,
             datasetNotLabeledId = Integer.parseInt(dataset.id),
             rmse,
-            rmse / (Pmax - Pmin))
+            rmse / (Pmax - Pmin),
+            0.0,
+            0.0)
     }
 
     private fun calculateNrmseLabeled(config: ConfigurationOSN, dataset: DatasetLabeled): ErrorForLabeled {

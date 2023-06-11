@@ -32,7 +32,7 @@ class ExecutionsParser(val parserForSteps: CSVParser,
         const val factCheckers = "factCheckers"
 
         const val believersSocialColumn = "Believers"
-        const val deniersSocialColumn = "Fact Checkers"
+        const val deniersSocialColumn = "Deniers"
 
         const val numberSteps = "number_steps"
         const val sharingDebunking = "sharing_debunking"

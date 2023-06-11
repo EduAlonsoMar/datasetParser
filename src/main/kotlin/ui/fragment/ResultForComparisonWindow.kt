@@ -12,6 +12,7 @@ class ResultForComparisonWindow : View() {
 
     private var dataSetNotLabeled: String? = null
     private var executionSelected: String? = null
+    private var timeToShow: String? = null
 
     private val chartNotLabeled: LineChart<String, Number> by fxid()
     // private val chartConfig: LineChart<String, Number> by fxid()
@@ -27,6 +28,7 @@ class ResultForComparisonWindow : View() {
 
         dataSetNotLabeled = params[DATASET_NOT_LABELED_PARAM] as? String
         executionSelected = params[EXECUTION_PARAM] as? String
+        timeToShow = params[TIME_PARAM] as? String
 
         chartNotLabeled.title = "Dataset not labeled with title $dataSetNotLabeled"
         // chartConfig.title = "Execution with id $executionSelected"
@@ -42,7 +44,7 @@ class ResultForComparisonWindow : View() {
             seriesDatasetNotLabeled = XYChart.Series(
                 "Users sharing fake news per hour in dataset",
                 resultsChartCreationController.createUsersSharingFromDatasetNotLabeledTitle(
-                    datasetNotLabeledTitle
+                    datasetNotLabeledTitle, (timeToShow == TIME_DAYS)
                 )
             )
         }
@@ -59,6 +61,9 @@ class ResultForComparisonWindow : View() {
     companion object {
         const val DATASET_NOT_LABELED_PARAM = "datasetNotLabeled"
         const val EXECUTION_PARAM = "execution"
+        const val TIME_PARAM = "timeToShow"
+        const val TIME_HOURS = "hours"
+        const val TIME_DAYS = "days"
     }
 }
 

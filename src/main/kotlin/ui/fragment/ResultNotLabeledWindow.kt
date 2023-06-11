@@ -29,8 +29,8 @@ class ResultNotLabeledWindow : View("My View") {
         //resultChart.removeFromParent()
 
         datasetSelected?.let {
-            seriesHours = XYChart.Series("Users sharing fake news per hour", resultsChartCreationController.createUsersSharingFromDatasetNotLabeledTitle(it))
-            seriesDays = XYChart.Series("Users sharing fake news per day", resultsChartCreationController.createUserSharingPerDayDatasetNotLabeled(it))
+            seriesHours = XYChart.Series("Users sharing fake news per hour", resultsChartCreationController.createUsersSharingFromDatasetNotLabeledTitle(it, false))
+            seriesDays = XYChart.Series("Users sharing fake news per day", resultsChartCreationController.createUsersSharingFromDatasetNotLabeledTitle(it, true))
         }
         resultChartHours.title = "Time evolution for $datasetSelected"
 

@@ -1,8 +1,5 @@
 package ui
 
-import data.repository.DatasetLabeledRepository
-import data.repository.DatasetNotLabeledRepository
-import data.repository.ExecutionsResultsRepository
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.control.ComboBox
@@ -13,6 +10,9 @@ import ui.fragment.*
 import ui.fragment.ResultForComparisonLabeledWindow.Companion.DATASET_LABELED_PARAM
 import ui.fragment.ResultForComparisonWindow.Companion.DATASET_NOT_LABELED_PARAM
 import ui.fragment.ResultForComparisonWindow.Companion.EXECUTION_PARAM
+import ui.fragment.ResultForComparisonWindow.Companion.TIME_DAYS
+import ui.fragment.ResultForComparisonWindow.Companion.TIME_HOURS
+import ui.fragment.ResultForComparisonWindow.Companion.TIME_PARAM
 import ui.handler.ResultsController
 
 class ResultWindow : View() {
@@ -24,11 +24,15 @@ class ResultWindow : View() {
     private val resultsController: ResultsController by inject()
 
     private val selectedDatasetNotLabeled = SimpleStringProperty()
+    private val selectedDatasetNotLabeledDays = SimpleStringProperty()
     private val selectedDatasetLabeled = SimpleStringProperty()
     private val selectedDatasetLabeledSocial = SimpleStringProperty()
 
     private lateinit var datasetNotLabeledComboBox: ComboBox<String?>
     private lateinit var executionOSNComboBox: ComboBox<String?>
+
+    private lateinit var datasetNotLabeledComboBoxDays: ComboBox<String?>
+    private lateinit var executionsOSNDays: ComboBox<String?>
 
     private lateinit var datasetLabeledOSNComboBox: ComboBox<String?>
     private lateinit var executionOSNComboBoxLabeled: ComboBox<String?>
@@ -169,7 +173,7 @@ class ResultWindow : View() {
                                 addClass(AppStyle.textField)
                             }
 
-                            label("Dataset not labeled id") {
+                            label("Dataset not labeled id (hours)") {
                                 addClass(AppStyle.textField)
                             }
                         }
@@ -192,12 +196,50 @@ class ResultWindow : View() {
                                 find<ResultForComparisonWindow>(
                                     mapOf(
                                         DATASET_NOT_LABELED_PARAM to datasetNotLabeledCombo.selectedItem,
-                                        EXECUTION_PARAM to executionCombo.selectedItem
+                                        EXECUTION_PARAM to executionCombo.selectedItem,
+                                        TIME_PARAM to TIME_HOURS
                                     )
                                 ).openWindow()
                             }
 
                         }
+
+                        hbox {
+                            label("execution id") {
+                                addClass(AppStyle.textField)
+                            }
+
+                            label("Dataset not labeled id (days)") {
+                                addClass(AppStyle.textField)
+                            }
+                        }
+                        hbox {
+                            id = "hboxWithComparisonOSNNotLabeledDays"
+                            var executionCombo = combobox {
+                                addClass(AppStyle.textField)
+                                id = "executionOSNDays"
+                            }
+
+                            val datasetNotLabeledCombo = combobox(
+                                selectedDatasetNotLabeledDays,
+                                resultsController.getTitleForDataSetsWithMostUsers().toObservable()
+                            ) {
+                                addClass(AppStyle.comboBoxWithLimit)
+                                id = "dataSetNotLabeledDays"
+                            }
+
+                            button("Show Comparison").setOnAction {
+                                find<ResultForComparisonWindow>(
+                                    mapOf(
+                                        DATASET_NOT_LABELED_PARAM to datasetNotLabeledCombo.selectedItem,
+                                        EXECUTION_PARAM to executionCombo.selectedItem,
+                                        TIME_PARAM to TIME_DAYS
+                                    )
+                                ).openWindow()
+                            }
+
+                        }
+
                         val executionLabeled = hbox {
                             label("execution id") {
                                 addClass(AppStyle.textField)
@@ -321,6 +363,15 @@ class ResultWindow : View() {
                                         datasetNotLabeledComboBox = l as ComboBox<String?>
                                     }
                                 }
+                            } else if (k.id == "hboxWithComparisonOSNNotLabeledDays") {
+                                for (q in k.getChildList()!!) {
+                                    println("id: ${q.id}")
+                                    if (q.id == "executionOSNDays") {
+                                        executionsOSNDays = (q as ComboBox<String?>)
+                                    } else if (q.id == "dataSetNotLabeledDays") {
+                                        datasetNotLabeledComboBoxDays = (q as ComboBox<String?>)
+                                    }
+                                }
                             } else if (k.id == "hboxForOSNANDLabeled") {
                                 for (m in k.getChildList()!!) {
                                     println("id: ${m.id}")
@@ -360,6 +411,12 @@ class ResultWindow : View() {
         selectedDatasetNotLabeled.onChange {
             executionOSNComboBox.items = resultsController.getBestOSNConfigurationsForDataSetNotLabeled(
                 datasetNotLabeledComboBox.selectedItem ?: "default"
+            ).toObservable()
+        }
+
+        selectedDatasetNotLabeledDays.onChange {
+            executionsOSNDays.items = resultsController.getBestOSNConfigurationsForDataSetNotLabeledDays(
+                datasetNotLabeledComboBoxDays.selectedItem ?: "default"
             ).toObservable()
         }
 

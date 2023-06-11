@@ -6,6 +6,10 @@ import data.parser.DatasetNotLabeledParser
 import data.parser.ExecutionsParser
 import data.parser.model.TuitNewsRecord
 import data.repository.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import tornadofx.Controller
@@ -27,6 +31,10 @@ class ParserController : Controller() {
 
     private var fileWithSteps: File? = null
     private var fileWithConfig: File? = null
+
+    private var _parsingDatasetLabeledPercentage = MutableStateFlow<Int?>(null)
+    val parsingDatasetLabeledPercentage = _parsingDatasetLabeledPercentage as StateFlow<Int?>
+
 
     fun fileLabeledSelected(file: File) {
         println("File selected ${file.path}")
@@ -161,7 +169,7 @@ class ParserController : Controller() {
         fileWithSteps = file
     }
 
-    private fun calculateNrmseNotLabeled(config: ConfigurationOSN, dataset: DatasetNotLabeled): ErrorForNotLabeled {
+    private fun calculateNrmse(config: ConfigurationOSN, dataset: DatasetNotLabeled, isForDays: Boolean): PairOfErrorsForNotLabeled {
         var i = 0
         var j = 0
         var percentageOfBelieversSharingInStep: Double
@@ -171,9 +179,13 @@ class ParserController : Controller() {
         var Pmin = 0.0
         var numberUsersSharingInAnHour: Double
         while (j < 30) {
-            numberUsersSharingInAnHour = datasetNotLabeledRepository.getNumberOfUserSendingInAnHour(Integer.parseInt(dataset.id), j).toDouble()
+            numberUsersSharingInAnHour = if (isForDays) {
+                datasetNotLabeledRepository.getNumberOfUsersSentingInDay(Integer.parseInt(dataset.id), j).toDouble()
+            } else {
+                datasetNotLabeledRepository.getNumberOfUserSendingInAnHour(Integer.parseInt(dataset.id), j).toDouble()
+            }
             percentageOfBelieversSharingInStep =
-                (executionsResultsRepository.getNumberOfUserSendingInAnHour(config.id.toString(), i).toDouble() * 100) / 1000
+                (executionsResultsRepository.getNumberOfUserSendingInAnHour(config.id.toString(), i).toDouble() * 100) / executionsResultsRepository.getTotalUsers(config.id.toString())
             percentageOfBelieversSahringinDataset = (numberUsersSharingInAnHour * 100) / datasetNotLabeledRepository.getTotalUsers(Integer.parseInt(dataset.id))
             if (i == 0) {
                 Pmin = percentageOfBelieversSahringinDataset
@@ -189,11 +201,25 @@ class ParserController : Controller() {
             j++
         }
         val rmse = Math.sqrt(totalSum / 30)
+        val nrmse = rmse / (Pmax - Pmin)
+
+        return PairOfErrorsForNotLabeled(
+                rmse = rmse,
+                nrmse = nrmse
+            )
+    }
+    private fun calculateNrmseNotLabeled(config: ConfigurationOSN, dataset: DatasetNotLabeled): ErrorForNotLabeled {
+        val errorsForNotLabeledHours = calculateNrmse(config, dataset, false)
+        val errorsForNotLabeledDays = calculateNrmse(config, dataset, true)
+
+
         return ErrorForNotLabeled(
             configurationId = config.id!!,
             datasetNotLabeledId = Integer.parseInt(dataset.id),
-            rmse,
-            rmse / (Pmax - Pmin))
+            errorsForNotLabeledHours.rmse,
+            errorsForNotLabeledHours.nrmse,
+            errorsForNotLabeledDays.rmse,
+            errorsForNotLabeledDays.nrmse)
     }
 
     private fun calculateNrmseLabeled(config: ConfigurationOSN, dataset: DatasetLabeled): ErrorForLabeled {
@@ -322,12 +348,12 @@ class ParserController : Controller() {
             )
         }
 
-        println("Starting to calculate error for datasets not labeled. Total of ${keyMapForConfigIds.keys.size} different configurations inserted")
+        println("Starting to calculate error for datasets not labeled. Total of ${keyMapForConfigIds.values.size} different configurations inserted")
 
-        for (key in keyMapForConfigIds.keys) {
+        for (value in keyMapForConfigIds.values) {
             val listNotLabeled = datasetNotLabeledRepository.getDataSets()
             val listLabeled = datasetLabeledRepository.getDatasets()
-            val config = executionsResultsRepository.getConfigurationOSN(Integer.parseInt(key))
+            val config = executionsResultsRepository.getConfigurationOSN(value)
             for (dataset in listNotLabeled) {
                 executionsResultsRepository.insertErrorNotLabeled(calculateNrmseNotLabeled(config, dataset))
             }
@@ -420,82 +446,87 @@ class ParserController : Controller() {
 
     }
 
-    fun parseExecutionResultsFilesFromSocialFakeNewsModel() {
-        if (fileWithConfig == null ||
-            fileWithSteps == null
-        ) {
-            println("All files for execution result parsing must be present")
-            return
-        }
-
-        val parser = executionsParserRepository.getParser(
-            fileWithConfig = fileWithConfig!!,
-            fileWithSteps = fileWithSteps!!
-        )
-
-        val keyMapForConfigIds = mutableMapOf<String, Int>()
-        var configId: Int
-        for (record in parser.parserForConfig) {
-            configId = executionsResultsRepository.insertConfigurationSocial(
-                ConfigurationSocialFakeNews(
-
-                    believersCount = record.get(ExecutionsParser.nBelieversColumn),
-                    deniersCount = record.get(ExecutionsParser.denierCountColumn),
-                    susceptibleCount = (Integer.parseInt(record.get(ExecutionsParser.nAgentsColumn)) -
-                            (Integer.parseInt(record.get(ExecutionsParser.nBelieversColumn)) +
-                                    Integer.parseInt(record.get(ExecutionsParser.denierCountColumn))))
-                        .toString(),
-                    averageFollowers = record.get(ExecutionsParser.avgFollowersColumn),
-                    selectedTopology = record.get(ExecutionsParser.selectedTopologyColumn),
-                    numberOfTicks = record.get(ExecutionsParser.nTicksColumn),
-                    totalAgents = record.get(ExecutionsParser.nAgentsColumn),
-                    nodesInBarabasi = record.get(ExecutionsParser.nodesInBarabasiColumn),
-                    initialNodesInBarabasi = record.get(ExecutionsParser.initialNodesBarabasiColumn),
-                    nBots = record.get(ExecutionsParser.nBotsColumn),
-                    createInterest = record.get(ExecutionsParser.createInterestsColumn),
-                    nOfInterests = record.get(ExecutionsParser.nOfInterestsColumn),
-                    nOfInfluencersBelievers = record.get(ExecutionsParser.nInfluencersBelieversColumn),
-                    nOfInfluencersDeniers = record.get(ExecutionsParser.nInfluencersDeniersColumn),
-                    nOfInfluencersSusceptibles = record.get(ExecutionsParser.nInfluencersSusceptiblesColumn),
-                    nFollowersToBeInfluencer = record.get(ExecutionsParser.nFollowersInfluencersColumn),
-                    nBotsConnections = record.get(ExecutionsParser.nBotsConnectionsColumn),
-                    pInfl = record.get(ExecutionsParser.influencersProbColumn),
-                    pbelieve = record.get(ExecutionsParser.believeProbColumn),
-                    pDeny = record.get(ExecutionsParser.denyProbSocialColumn),
-                    pVacc = record.get(ExecutionsParser.vaccProbColumn),
-                    seed = record.get(ExecutionsParser.seedColumn)
-                )
-            )
-            keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)] = configId
-        }
-
-        for (record in parser.parserForSteps) {
-            executionsResultsRepository.insertStepSocial(
-                Step(
-                    record.get(ExecutionsParser.tickColumn),
-                    record.get(ExecutionsParser.believersSocialColumn),
-                    record.get(ExecutionsParser.deniersSocialColumn),
-                    keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)].toString(),
-                    "0"
-                )
-            )
-        }
-
-        println("Starting to calculate error for datasets labeled. Total of ${keyMapForConfigIds.keys.size} different configurations inserted")
-        for (key in keyMapForConfigIds.keys) {
-            val executionId = keyMapForConfigIds[key]
-            executionId?.let {exeId ->
-                val config = executionsResultsRepository.getConfigurationSocial(executionId)
-
-                val listLabeled = datasetLabeledRepository.getDatasets()
-
-                for (dataset in listLabeled) {
-                    executionsResultsRepository.insertErrorSocialLabeled(calculateNrmseLabeledSocial(config, dataset))
-                }
-
-                println("Calculated error labeled")
+    suspend fun parseExecutionResultsFilesFromSocialFakeNewsModel() = coroutineScope {
+        this.launch {
+            if (fileWithConfig == null ||
+                fileWithSteps == null
+            ) {
+                println("All files for execution result parsing must be present")
+                return@launch
             }
 
+            val parser = executionsParserRepository.getParser(
+                fileWithConfig = fileWithConfig!!,
+                fileWithSteps = fileWithSteps!!
+            )
+
+            val keyMapForConfigIds = mutableMapOf<String, Int>()
+            var configId: Int
+            _parsingDatasetLabeledPercentage.emit(0)
+            for (record in parser.parserForConfig) {
+                configId = executionsResultsRepository.insertConfigurationSocial(
+                    ConfigurationSocialFakeNews(
+
+                        believersCount = record.get(ExecutionsParser.nBelieversColumn),
+                        deniersCount = record.get(ExecutionsParser.denierCountColumn),
+                        susceptibleCount = (Integer.parseInt(record.get(ExecutionsParser.nAgentsColumn)) -
+                                (Integer.parseInt(record.get(ExecutionsParser.nBelieversColumn)) +
+                                        Integer.parseInt(record.get(ExecutionsParser.denierCountColumn))))
+                            .toString(),
+                        averageFollowers = record.get(ExecutionsParser.avgFollowersColumn),
+                        selectedTopology = record.get(ExecutionsParser.selectedTopologyColumn),
+                        numberOfTicks = record.get(ExecutionsParser.nTicksColumn),
+                        totalAgents = record.get(ExecutionsParser.nAgentsColumn),
+                        nodesInBarabasi = record.get(ExecutionsParser.nodesInBarabasiColumn),
+                        initialNodesInBarabasi = record.get(ExecutionsParser.initialNodesBarabasiColumn),
+                        nBots = record.get(ExecutionsParser.nBotsColumn),
+                        createInterest = record.get(ExecutionsParser.createInterestsColumn),
+                        nOfInterests = record.get(ExecutionsParser.nOfInterestsColumn),
+                        nOfInfluencersBelievers = record.get(ExecutionsParser.nInfluencersBelieversColumn),
+                        nOfInfluencersDeniers = record.get(ExecutionsParser.nInfluencersDeniersColumn),
+                        nOfInfluencersSusceptibles = record.get(ExecutionsParser.nInfluencersSusceptiblesColumn),
+                        nFollowersToBeInfluencer = record.get(ExecutionsParser.nFollowersInfluencersColumn),
+                        nBotsConnections = record.get(ExecutionsParser.nBotsConnectionsColumn),
+                        pInfl = record.get(ExecutionsParser.influencersProbColumn),
+                        pbelieve = record.get(ExecutionsParser.believeProbColumn),
+                        pDeny = record.get(ExecutionsParser.denyProbSocialColumn),
+                        pVacc = record.get(ExecutionsParser.vaccProbColumn),
+                        seed = record.get(ExecutionsParser.seedColumn)
+                    )
+                )
+                keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)] = configId
+            }
+            _parsingDatasetLabeledPercentage.emit(25)
+            for (record in parser.parserForSteps) {
+                executionsResultsRepository.insertStepSocial(
+                    Step(
+                        record.get(ExecutionsParser.tickColumn),
+                        record.get(ExecutionsParser.believersSocialColumn),
+                        record.get(ExecutionsParser.deniersSocialColumn),
+                        keyMapForConfigIds[record.get(ExecutionsParser.configSocialIdColumn)].toString(),
+                        "0"
+                    )
+                )
+            }
+            _parsingDatasetLabeledPercentage.emit(50)
+            println("Starting to calculate error for datasets labeled. Total of ${keyMapForConfigIds.keys.size} different configurations inserted")
+            for (key in keyMapForConfigIds.keys) {
+                val executionId = keyMapForConfigIds[key]
+                executionId?.let {exeId ->
+                    val config = executionsResultsRepository.getConfigurationSocial(executionId)
+
+                    val listLabeled = datasetLabeledRepository.getDatasets()
+
+                    for (dataset in listLabeled) {
+                        executionsResultsRepository.insertErrorSocialLabeled(calculateNrmseLabeledSocial(config, dataset))
+                    }
+
+                    println("Calculated error labeled")
+                }
+
+            }
+            _parsingDatasetLabeledPercentage.emit(100)
         }
+
     }
 }

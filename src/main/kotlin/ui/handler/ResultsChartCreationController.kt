@@ -64,12 +64,18 @@ class ResultsChartCreationController : Controller() {
         return createDeniersSeriesInLabeledDatasetId(datasetLabeledRepository.getDatasetId(datasetTitle))
     }
 
-    fun createUsersSharingFromDatasetNotLabeledTitle(datasetTitle: String): ObservableList<XYChart.Data<String, Number>> {
+    fun createUsersSharingFromDatasetNotLabeledTitle(
+        datasetTitle: String,
+        showDays: Boolean
+    ): ObservableList<XYChart.Data<String, Number>> {
         val datasetId = datasetNotLabeledRepository.getDatasetId(datasetTitle)
-        return createUsersSharingFromDatasetNotLabeledId(datasetId)
+        return createUsersSharingFromDatasetNotLabeledId(datasetId, showDays)
     }
 
-    fun createUsersSharingFromDatasetNotLabeledId(datasetId: Int): ObservableList<XYChart.Data<String, Number>> {
+    fun createUsersSharingFromDatasetNotLabeledId(
+        datasetId: Int,
+        showDays: Boolean
+    ): ObservableList<XYChart.Data<String, Number>> {
         val result = mutableListOf<XYChart.Data<String, Number>>().toObservable()
         var data: XYChart.Data<String, Number>
         var hours: String
@@ -77,10 +83,21 @@ class ResultsChartCreationController : Controller() {
             hours = String.format(templateForXAxis, i)
             data = XYChart.Data<String, Number>(
                 hours,
-                (datasetNotLabeledRepository.getNumberOfUserSendingInAnHour(
-                    datasetId,
-                    i
-                ) * 100) / datasetNotLabeledRepository.getTotalUsers(datasetId)
+
+                        if (showDays) {
+                            (
+                                    datasetNotLabeledRepository.getNumberOfUsersSentingInDay(
+                                        datasetId,
+                                        i
+                                    ) * 100)
+                        } else {
+                            (datasetNotLabeledRepository.getNumberOfUserSendingInAnHour(
+                                datasetId,
+                                i
+                            ) * 100)
+                        }
+
+                / datasetNotLabeledRepository.getTotalUsers(datasetId)
             )
             result.add(data)
         }

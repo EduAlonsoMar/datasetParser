@@ -13,6 +13,7 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     testImplementation(kotlin("test"))
     implementation("org.apache.commons:commons-csv:1.5")
@@ -20,6 +21,7 @@ dependencies {
     implementation ("no.tornado:tornadofx:1.7.20")
 
     implementation ("io.insert-koin:koin-core:3.3.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 }
 
 tasks.test {

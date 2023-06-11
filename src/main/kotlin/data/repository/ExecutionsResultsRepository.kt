@@ -44,6 +44,15 @@ class ExecutionsResultsRepository : KoinComponent {
             }
     }
 
+    fun getBestOSNConfigurationsForDataSetNotLabeledDays(dataset: String): List<String> {
+        return executionsDataSource
+            .getBestOSNConfigurationsForDataSetNotLabeledDays(
+                datasetNotLabeledDataSource.getFakeNewsIdFromTitle(dataset)
+            ).map{
+                it.id.toString()
+            }
+    }
+
     fun getBestOSNConfigurationsForDataSetLabeled(dataset: String): List<String> {
         return executionsDataSource
             .getBestOSNConfigurationsForDataSetLabeled(
@@ -68,6 +77,18 @@ class ExecutionsResultsRepository : KoinComponent {
 
     fun getConfigurationOSN(id: Int): ConfigurationOSN {
         return executionsDataSource.getConfigurationOSN(id)
+    }
+
+    fun getNrmseTotalOSN(datasetLabeledTitle: String, executionId: Int): Double {
+        return executionsDataSource.getNrmseTotalOSN(
+            datasetLabeledDataSource.getDataSetId(datasetLabeledTitle), executionId)
+    }
+
+    fun getNrmseTotalSocial(datasetLabeledTitle: String, executionId: Int): Double {
+        return executionsDataSource.getNrmseTotalSocial(
+            datasetLabeledDataSource.getDataSetId(datasetLabeledTitle),
+            executionId
+        )
     }
 
     fun getConfigurationsSocial(): List<ConfigurationSocialFakeNews> {

@@ -31,6 +31,10 @@ class ResultsController: Controller() {
         return executionsResultsRepository.getBestOSNConfigurationsForDataSetNotLabeled(dataset)
     }
 
+    fun getBestOSNConfigurationsForDataSetNotLabeledDays(dataset: String): List<String> {
+        return executionsResultsRepository.getBestOSNConfigurationsForDataSetNotLabeledDays(dataset)
+    }
+
     fun getBestOSNConfigurationsForDataSetLabeled(dataset: String): List<String> {
         return executionsResultsRepository.getBestOSNConfigurationsForDataSetLabeled(dataset)
     }

@@ -3,7 +3,6 @@ package ui.fragment
 
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.XYChart
-import javafx.scene.control.Label
 import javafx.scene.layout.BorderPane
 import tornadofx.*
 import ui.css.AppStyle
@@ -19,7 +18,6 @@ class ResultForComparisonLabeledSocialWindow: View() {
 
     private val chartLabeled: LineChart<String, Number> by fxid()
     private val configData: BorderPane by fxid()
-    // private val chartConfig: LineChart<String, Number> by fxid()
 
     private val resultsChartCreationController: ResultsChartCreationController by inject()
     private val executionsDataController: ExecutionsDataController by inject()
@@ -291,6 +289,21 @@ class ResultForComparisonLabeledSocialWindow: View() {
                     }
                     label {
                         text = configSocial.seed
+                    }
+                }
+
+            }
+
+            vbox {
+                hbox {
+                    addClass(
+                        AppStyle.parserLine
+                    )
+                    label {
+                        text = "Nrmse total: "
+                    }
+                    label {
+                        text = executionsDataController.getNrsmeTotalSocial(dataSetLabeled!!, Integer.parseInt(executionSelected)).toString()
                     }
                 }
 
